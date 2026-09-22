@@ -54,6 +54,12 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
                   Your Request
                 </span>
               )}
+              {Boolean(poster?.whatsapp_enabled && poster?.phone_number) && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  WhatsApp
+                </span>
+              )}
             </div>
             <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{need.title}</h3>
             {need.description && (
@@ -115,7 +121,7 @@ export default async function RequestsPage() {
       status,
       created_at,
       poster_id,
-      poster:profiles!poster_id(id, full_name, department, year, is_verified, rating),
+      poster:profiles!poster_id(id, full_name, department, year, is_verified, rating, phone_number, whatsapp_enabled),
       category:categories(id, name, slug)
     `)
     .eq('status', 'open')

@@ -129,7 +129,20 @@ export function ProfileSettingsForm({
   const [passwordState, passwordAction, isPasswordPending] = useActionState(updatePassword, INITIAL);
   const [avatar, setAvatar] = React.useState<string | null>(avatarUrl ?? null);
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
+  const [phoneVal, setPhoneVal] = React.useState<string>(formatPhoneDisplay(phoneNumber));
   const [isWhatsAppOn, setIsWhatsAppOn] = React.useState(Boolean(whatsappEnabled));
+  const [hasManuallyToggled, setHasManuallyToggled] = React.useState(false);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setPhoneVal(val);
+    const digits = val.replace(/\D/g, '');
+    if (digits.length >= 10 && !hasManuallyToggled) {
+      setIsWhatsAppOn(true);
+    } else if (digits.length === 0) {
+      setIsWhatsAppOn(false);
+    }
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -292,12 +305,13 @@ export function ProfileSettingsForm({
                   <input
                     type="tel"
                     name="phone_number"
-                    defaultValue={formatPhoneDisplay(phoneNumber)}
+                    value={phoneVal}
+                    onChange={handlePhoneChange}
                     placeholder="+91 XXXXX XXXXX"
                     maxLength={18}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white focus:border-transparent transition-all font-mono"
                   />
-                  <p className="text-xs text-gray-400">Accepts normal Indian numbers including +91.</p>
+                  <p className="text-xs text-gray-400">Accepts normal 10-digit Indian numbers (+91 optional).</p>
                 </div>
 
                 <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3">
@@ -324,7 +338,10 @@ export function ProfileSettingsForm({
                       type="checkbox"
                       name="whatsapp_enabled"
                       checked={isWhatsAppOn}
-                      onChange={(e) => setIsWhatsAppOn(e.target.checked)}
+                      onChange={(e) => {
+                        setHasManuallyToggled(true);
+                        setIsWhatsAppOn(e.target.checked);
+                      }}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>

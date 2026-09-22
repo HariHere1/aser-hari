@@ -310,12 +310,22 @@ export function AdminDashboardClient({
                       </td>
                       <td className="px-6 py-4">
                         {s.whatsapp_enabled ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-semibold">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Enabled
-                          </span>
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-semibold">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              Enabled
+                            </span>
+                            {s.phone_number && (
+                              <p className="text-[11px] font-mono text-gray-500 mt-1">{s.phone_number}</p>
+                            )}
+                          </div>
+                        ) : s.phone_number ? (
+                          <div>
+                            <span className="text-xs text-amber-600 font-medium">Disabled (Phone added)</span>
+                            <p className="text-[11px] font-mono text-gray-400 mt-1">{s.phone_number}</p>
+                          </div>
                         ) : (
-                          <span className="text-xs text-gray-400">Disabled</span>
+                          <span className="text-xs text-gray-400">Not provided</span>
                         )}
                       </td>
                       <td className="px-6 py-4">

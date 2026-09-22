@@ -209,9 +209,28 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
                 )}
               </div>
             ) : (
-              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
-                <p className="font-semibold text-gray-900">Your Ride Offer</p>
-                <p className="text-gray-500">You posted this ride. Other students can view and contact you to request seats.</p>
+              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl space-y-2.5">
+                <div className="text-center space-y-1">
+                  <p className="font-semibold text-gray-900">Your Ride Offer</p>
+                  <p className="text-gray-500">You posted this ride. Other students can view and contact you to request seats.</p>
+                </div>
+                <div className="pt-2.5 border-t border-gray-200 flex items-center justify-between text-xs">
+                  <span className="text-gray-600 font-medium">WhatsApp Contact</span>
+                  {hasWhatsApp ? (
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Active for students
+                    </span>
+                  ) : creator?.phone_number ? (
+                    <Link href="/dashboard/profile/settings" className="inline-flex items-center gap-1 text-amber-700 hover:text-amber-800 font-semibold underline">
+                      Disabled · Turn on in Settings
+                    </Link>
+                  ) : (
+                    <Link href="/dashboard/profile/settings" className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 underline">
+                      Add phone in Settings
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
           </div>
