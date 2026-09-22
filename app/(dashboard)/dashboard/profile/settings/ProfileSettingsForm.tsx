@@ -108,6 +108,7 @@ export function ProfileSettingsForm({
   year,
   studentId,
   bio,
+  avatarUrl,
   isOAuth,
 }: {
   fullName: string;
@@ -116,11 +117,28 @@ export function ProfileSettingsForm({
   year: string | null;
   studentId: string | null;
   bio: string | null;
+  avatarUrl?: string | null;
   isOAuth: boolean;
 }) {
-  const [profileState, profileAction] = useActionState(updateProfile, INITIAL);
-  const [passwordState, passwordAction] = useActionState(updatePassword, INITIAL);
-  const [isPending, startTransition] = useTransition();
+  const [profileState, profileAction, isProfilePending] = useActionState(updateProfile, INITIAL);
+  const [passwordState, passwordAction, isPasswordPending] = useActionState(updatePassword, INITIAL);
+  const [avatar, setAvatar] = React.useState<string | null>(avatarUrl ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    const { createClient } = await import('@/lib/supabase');
+    const supabase = createClient();
+    const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, file);
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatar(publicUrl);
+    }
+    setUploadingAvatar(false);
+  };
 
   const YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Postgraduate', 'PhD'];
   const DEPARTMENTS = [
@@ -129,6 +147,8 @@ export function ProfileSettingsForm({
     'Chemical Engineering', 'Mathematics', 'Physics', 'Chemistry',
     'Business Administration', 'Design', 'Arts & Humanities', 'Other',
   ];
+
+  const initials = fullName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'U';
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
@@ -145,6 +165,7 @@ export function ProfileSettingsForm({
 
       {/* ── Profile Info ── */}
       <form action={profileAction} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <input type="hidden" name="avatar_url" value={avatar ?? ''} />
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
           <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
             <User className="w-4 h-4 text-gray-500" />
@@ -152,8 +173,32 @@ export function ProfileSettingsForm({
           <h2 className="font-semibold text-gray-900 text-sm">Profile Information</h2>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-5">
           <StatusBanner state={profileState} />
+
+          {/* Avatar Upload */}
+          <div className="flex items-center gap-4 pb-2">
+            {avatar ? (
+              <img src={avatar} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-gray-200" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-xl font-bold">
+                {initials}
+              </div>
+            )}
+            <div>
+              <label className="cursor-pointer inline-flex items-center px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-semibold transition-colors">
+                {uploadingAvatar ? 'Uploading...' : 'Change Photo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  disabled={uploadingAvatar}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-gray-400 mt-1">PNG or JPG up to 5MB.</p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -228,10 +273,10 @@ export function ProfileSettingsForm({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isProfilePending}
               className="flex items-center gap-2 px-6 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isProfilePending && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes
             </button>
           </div>
@@ -257,10 +302,10 @@ export function ProfileSettingsForm({
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPasswordPending}
                 className="flex items-center gap-2 px-6 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
-                {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isPasswordPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Update Password
               </button>
             </div>

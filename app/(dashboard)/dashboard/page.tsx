@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Users, MapPin, Plus, Clock, HelpCircle, Car, Lightbulb, Package, ArrowRight } from 'lucide-react';
+import { BookOpen, Users, MapPin, Plus, Clock, HelpCircle, Car, Lightbulb, Package, ArrowRight, Star } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 
 export default async function DashboardHomePage() {
@@ -12,18 +12,55 @@ export default async function DashboardHomePage() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const initials = displayName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
+  // Load real data from live Supabase tables in parallel
+  const [
+    { data: recentResources },
+    { data: recentNeeds },
+    { data: recentRides },
+    { data: recentSkills },
+    { count: myResCount },
+    { count: myNeedCount },
+    { count: myRideCount },
+    { count: mySkillCount },
+  ] = await Promise.all([
+    supabase
+      .from('resources')
+      .select('id, title, price, price_unit, method, condition, created_at, owner:profiles!owner_id(full_name, department)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(4),
+    supabase
+      .from('needs')
+      .select('id, title, budget_min, budget_max, created_at, poster:profiles!poster_id(full_name, department)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(4),
+    supabase
+      .from('rides')
+      .select('id, from_location, to_location, ride_date, ride_time, available_seats, estimated_cost, creator:profiles!creator_id(full_name)')
+      .eq('status', 'active')
+      .order('ride_date', { ascending: true })
+      .limit(3),
+    supabase
+      .from('skills')
+      .select('id, title, level, rate, rate_unit, availability, owner:profiles!owner_id(full_name, department)')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(3),
+    supabase.from('resources').select('*', { count: 'exact', head: true }).eq('owner_id', user?.id ?? ''),
+    supabase.from('needs').select('*', { count: 'exact', head: true }).eq('poster_id', user?.id ?? ''),
+    supabase.from('rides').select('*', { count: 'exact', head: true }).eq('creator_id', user?.id ?? ''),
+    supabase.from('skills').select('*', { count: 'exact', head: true }).eq('owner_id', user?.id ?? ''),
+  ]);
+
   const hubs = [
-    { title: 'Resources', icon: BookOpen, path: '/dashboard/resources', desc: 'Books, tools & gear', bg: 'bg-violet-50', iconColor: 'text-violet-600', border: 'hover:border-violet-200' },
-    { title: 'Rides', icon: Car, path: '/dashboard/rides', desc: 'Carpool to campus', bg: 'bg-amber-50', iconColor: 'text-amber-600', border: 'hover:border-amber-200' },
-    { title: 'Skills', icon: Users, path: '/dashboard/skills', desc: 'Tutoring & mentoring', bg: 'bg-sky-50', iconColor: 'text-sky-600', border: 'hover:border-sky-200' },
-    { title: 'I Need', icon: HelpCircle, path: '/dashboard/requests', desc: 'Post a request', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', border: 'hover:border-emerald-200' },
+    { title: 'Resources', icon: BookOpen, path: '/dashboard/resources', desc: 'Borrow, buy or rent', bg: 'bg-violet-50', iconColor: 'text-violet-600', border: 'hover:border-violet-200' },
+    { title: 'I Need', icon: HelpCircle, path: '/dashboard/requests', desc: 'Ask campus for help', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', border: 'hover:border-emerald-200' },
+    { title: 'Rides', icon: Car, path: '/dashboard/rides', desc: 'Carpool & split costs', bg: 'bg-amber-50', iconColor: 'text-amber-600', border: 'hover:border-amber-200' },
+    { title: 'Skills', icon: Users, path: '/dashboard/skills', desc: 'Tutoring & exchange', bg: 'bg-sky-50', iconColor: 'text-sky-600', border: 'hover:border-sky-200' },
   ];
 
-  const quickActions = [
-    { label: 'Post a Resource', icon: Package, href: '/dashboard/resources/create', bg: 'bg-violet-100', iconColor: 'text-violet-600', hoverBg: 'hover:bg-violet-200' },
-    { label: 'Offer a Ride', icon: MapPin, href: '/dashboard/rides/create', bg: 'bg-amber-100', iconColor: 'text-amber-600', hoverBg: 'hover:bg-amber-200' },
-    { label: 'Add a Skill', icon: Lightbulb, href: '/dashboard/skills/my-skills', bg: 'bg-sky-100', iconColor: 'text-sky-600', hoverBg: 'hover:bg-sky-200' },
-  ];
+  const totalUserListings = (myResCount ?? 0) + (myNeedCount ?? 0) + (myRideCount ?? 0) + (mySkillCount ?? 0);
 
   return (
     <div className="space-y-8">
@@ -33,17 +70,17 @@ export default async function DashboardHomePage() {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
             {greeting}, {firstName}! 👋
           </h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">What do you need on campus today?</p>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">What would you like to share or find today?</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <a href="/dashboard/resources/create">
-            <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm">
               <Plus className="w-4 h-4" />
               Post Resource
             </button>
           </a>
           <a href="/dashboard/requests/create">
-            <button className="flex items-center gap-2 bg-white text-black border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+            <button className="flex items-center gap-2 bg-white text-black border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">
               <HelpCircle className="w-4 h-4" />
               Post Need
             </button>
@@ -68,95 +105,249 @@ export default async function DashboardHomePage() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Empty feed */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-400" />
-              Recent Listings
-            </h2>
-            <a href="/dashboard/resources" className="text-sm text-gray-500 hover:text-black font-medium transition-colors flex items-center gap-1">
-              Browse all <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+        {/* Left Column: Recent Live Listings */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Recent Resources */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Package className="w-4 h-4 text-violet-600" />
+                Recent Resources
+              </h2>
+              <a href="/dashboard/resources" className="text-xs text-gray-500 hover:text-black font-semibold transition-colors flex items-center gap-1">
+                View all <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {recentResources && recentResources.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {recentResources.map((res: any) => (
+                  <a
+                    key={res.id}
+                    href={`/dashboard/resources/${res.id}`}
+                    className="p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-sm transition-all block group"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 capitalize">
+                        {res.method ?? 'Available'}
+                      </span>
+                      <span className="text-xs font-bold text-gray-900">
+                        {res.price ? `₹${res.price}` : 'Free'}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-sm truncate group-hover:text-black">{res.title}</h3>
+                    <p className="text-xs text-gray-400 mt-1 truncate">
+                      {res.owner?.full_name ? `By ${res.owner.full_name}` : 'Campus Listing'}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-400">
+                No active resources yet. Be the first to list one!
+              </div>
+            )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-10 flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
-              <Package className="w-7 h-7 text-gray-300" />
+          {/* Recent Needs */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-600" />
+                Recent Student Needs
+              </h2>
+              <a href="/dashboard/requests" className="text-xs text-gray-500 hover:text-black font-semibold transition-colors flex items-center gap-1">
+                View all <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-1">No listings yet</h3>
-            <p className="text-xs text-gray-400 mb-5 max-w-xs">
-              Be the first to post — share a resource, offer a skill, or list a ride for your campus mates.
-            </p>
-            <a href="/dashboard/resources/create">
-              <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-                <Plus className="w-4 h-4" />
-                Post First Listing
-              </button>
-            </a>
+
+            {recentNeeds && recentNeeds.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {recentNeeds.map((need: any) => (
+                  <a
+                    key={need.id}
+                    href={`/dashboard/requests/${need.id}`}
+                    className="p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-sm transition-all block group"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                        Need
+                      </span>
+                      <span className="text-xs text-gray-500 font-medium">
+                        {need.budget_max ? `₹${need.budget_max}` : 'Open'}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-sm truncate group-hover:text-black">{need.title}</h3>
+                    <p className="text-xs text-gray-400 mt-1 truncate">
+                      {need.poster?.full_name ? `Requested by ${need.poster.full_name}` : 'Student request'}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-400">
+                No open student needs currently posted.
+              </div>
+            )}
+          </div>
+
+          {/* Recent Rides & Skills */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Rides */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                  <Car className="w-4 h-4 text-amber-600" />
+                  Upcoming Rides
+                </h2>
+                <a href="/dashboard/rides" className="text-xs text-gray-400 hover:text-black font-medium">More</a>
+              </div>
+              {recentRides && recentRides.length > 0 ? (
+                <div className="space-y-2">
+                  {recentRides.map((ride: any) => (
+                    <a
+                      key={ride.id}
+                      href={`/dashboard/rides/${ride.id}`}
+                      className="p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-all block text-xs"
+                    >
+                      <p className="font-bold text-gray-900 truncate">
+                        {ride.from_location} → {ride.to_location}
+                      </p>
+                      <div className="flex items-center justify-between text-gray-400 mt-1">
+                        <span>{ride.ride_date}</span>
+                        <span className="font-semibold text-gray-700">{ride.available_seats} seats left</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400">
+                  No upcoming rides scheduled.
+                </div>
+              )}
+            </div>
+
+            {/* Skills */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                  <Lightbulb className="w-4 h-4 text-sky-600" />
+                  Featured Skills
+                </h2>
+                <a href="/dashboard/skills" className="text-xs text-gray-400 hover:text-black font-medium">More</a>
+              </div>
+              {recentSkills && recentSkills.length > 0 ? (
+                <div className="space-y-2">
+                  {recentSkills.map((sk: any) => (
+                    <a
+                      key={sk.id}
+                      href={`/dashboard/skills/${sk.id}`}
+                      className="p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-all block text-xs"
+                    >
+                      <p className="font-bold text-gray-900 truncate">{sk.title}</p>
+                      <div className="flex items-center justify-between text-gray-400 mt-1">
+                        <span className="capitalize">{sk.level ?? 'Peer'}</span>
+                        <span className="font-semibold text-gray-700">
+                          {sk.rate ? `₹${sk.rate}/${sk.rate_unit || 'hr'}` : 'Free'}
+                        </span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400">
+                  No skills listed yet.
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* User card */}
-          <div className="bg-black text-white rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-base font-bold flex-shrink-0">
+        {/* Right Column: User Real Status & Shortcuts */}
+        <div className="space-y-6">
+          {/* User Card with real counts */}
+          <div className="bg-black text-white rounded-3xl p-6 shadow-md">
+            <div className="flex items-center gap-3.5 mb-5">
+              <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-base font-bold flex-shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold truncate">{firstName}</p>
+                <p className="font-bold truncate text-base">{displayName}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-xl font-bold">0</p>
-                <p className="text-xs text-gray-400 mt-0.5">Exchanges</p>
+
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
+              <div className="bg-white/10 rounded-2xl p-3 text-center">
+                <p className="text-2xl font-bold">{totalUserListings}</p>
+                <p className="text-xs text-gray-300 mt-0.5">My Listings</p>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-xl font-bold">0</p>
-                <p className="text-xs text-gray-400 mt-0.5">Listings</p>
+              <div className="bg-white/10 rounded-2xl p-3 text-center">
+                <p className="text-2xl font-bold">{myResCount ?? 0}</p>
+                <p className="text-xs text-gray-300 mt-0.5">Resources</p>
+              </div>
+              <div className="bg-white/10 rounded-2xl p-3 text-center">
+                <p className="text-2xl font-bold">{myRideCount ?? 0}</p>
+                <p className="text-xs text-gray-300 mt-0.5">Rides</p>
+              </div>
+              <div className="bg-white/10 rounded-2xl p-3 text-center">
+                <p className="text-2xl font-bold">{mySkillCount ?? 0}</p>
+                <p className="text-xs text-gray-300 mt-0.5">Skills</p>
               </div>
             </div>
-            <a href="/dashboard/profile" className="block w-full text-center py-2.5 bg-white text-black text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors">
-              View Profile
+
+            <a
+              href="/dashboard/profile"
+              className="w-full py-2.5 bg-white text-black hover:bg-gray-100 rounded-xl text-xs font-bold transition-colors block text-center"
+            >
+              View Full Profile
             </a>
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
-            <div className="space-y-1">
-              {quickActions.map((action) => (
-                <a key={action.label} href={action.href} className={`flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group`}>
-                  <div className={`w-8 h-8 ${action.bg} rounded-lg flex items-center justify-center ${action.hoverBg} transition-colors`}>
-                    <action.icon className={`w-4 h-4 ${action.iconColor}`} />
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium">{action.label}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Get started guide */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Getting Started</h3>
-            <div className="space-y-3">
-              {[
-                { step: '1', text: 'Complete your profile', href: '/dashboard/profile/settings' },
-                { step: '2', text: 'Post your first resource', href: '/dashboard/resources/create' },
-                { step: '3', text: 'Browse what\'s on campus', href: '/dashboard/resources' },
-              ].map((item) => (
-                <a key={item.step} href={item.href} className="flex items-center gap-3 group">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0 group-hover:bg-black group-hover:text-white transition-colors">
-                    {item.step}
-                  </div>
-                  <span className="text-xs text-gray-600 group-hover:text-black transition-colors">{item.text}</span>
-                </a>
-              ))}
+          {/* Quick Create Short Links */}
+          <div className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm space-y-3">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quick Actions</h3>
+            <div className="space-y-1.5">
+              <a
+                href="/dashboard/resources/create"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-xs font-semibold text-gray-700"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Package className="w-4 h-4 text-violet-600" />
+                  Post a Resource
+                </span>
+                <Plus className="w-3.5 h-3.5 text-gray-400" />
+              </a>
+              <a
+                href="/dashboard/requests/create"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-xs font-semibold text-gray-700"
+              >
+                <span className="flex items-center gap-2.5">
+                  <HelpCircle className="w-4 h-4 text-emerald-600" />
+                  Post a Need Request
+                </span>
+                <Plus className="w-3.5 h-3.5 text-gray-400" />
+              </a>
+              <a
+                href="/dashboard/rides/create"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-xs font-semibold text-gray-700"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Car className="w-4 h-4 text-amber-600" />
+                  Offer a Ride
+                </span>
+                <Plus className="w-3.5 h-3.5 text-gray-400" />
+              </a>
+              <a
+                href="/dashboard/skills/my-skills"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-xs font-semibold text-gray-700"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Lightbulb className="w-4 h-4 text-sky-600" />
+                  Offer a Skill
+                </span>
+                <Plus className="w-3.5 h-3.5 text-gray-400" />
+              </a>
             </div>
           </div>
         </div>

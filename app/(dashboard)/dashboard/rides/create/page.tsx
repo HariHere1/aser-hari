@@ -1,50 +1,128 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { MapPin, Calendar, Car, Users } from 'lucide-react';
+import React, { useActionState, useState } from 'react';
+import { ArrowLeft, MapPin, AlertCircle, Loader2 } from 'lucide-react';
+import { createRide, ActionState } from '@/app/actions/listings';
+
+const VEHICLE_TYPES = ['Car', 'Bike', 'Auto', 'SUV', 'Van', 'Other'];
+const INIT: ActionState = { error: null, success: false };
 
 export default function CreateRidePage() {
+  const [state, formAction, isPending] = useActionState(createRide, INIT);
+
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="text-center mb-8">
-        <div style={{ opacity: 0, animationDelay: '0.1s' }} className="animate-fade-in-up">
-          <h1 className="text-4xl font-normal tracking-tight mb-2">Offer a Ride</h1>
-          <p className="text-gray-500">Help fellow students get to campus or home.</p>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <a href="/dashboard/rides" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
+          <ArrowLeft className="w-4 h-4" />
+        </a>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Offer a Ride</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Help fellow students get to campus or home</p>
         </div>
       </div>
 
-      <Card className="p-8">
-        <div className="space-y-6 animate-fade-in-up">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input label="Origin" placeholder="e.g. Downtown Station" />
-            <Input label="Destination" placeholder="e.g. Campus North Gate" />
-          </div>
-          <div className="grid grid-cols-2 gap-6">
-            <Input label="Date" type="date" />
-            <Input label="Departure Time" type="time" />
-          </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Available Seats</label>
-              <Input type="number" placeholder="3" />
-            </div>
-            <Input label="Vehicle Model" placeholder="e.g. Honda Civic" />
-          </div>
-          <Input label="Estimated Cost per Person" placeholder="e.g. $2 or Free" />
-
-          <div className="p-4 bg-orange-50 rounded-xl border border-orange-100 flex gap-3 items-start">
-            <div className="w-5 h-5 rounded-full bg-orange-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-orange-700 leading-relaxed">
-              Ride creators are responsible for passenger safety. Please ensure your vehicle is registered and insured.
-            </p>
-          </div>
-
-          <Button className="w-full py-4">Publish Ride</Button>
+      {state.error && (
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          {state.error}
         </div>
-      </Card>
+      )}
+
+      <form action={formAction} className="space-y-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Route</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">From <span className="text-red-500">*</span></label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                <input required name="from_location" placeholder="e.g. Downtown Station, Kottayam"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">To <span className="text-red-500">*</span></label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                <input required name="to_location" placeholder="e.g. Campus North Gate"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Date <span className="text-red-500">*</span></label>
+              <input required name="ride_date" type="date"
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Departure Time <span className="text-red-500">*</span></label>
+              <input required name="ride_time" type="time"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Vehicle & Seats</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Available Seats <span className="text-red-500">*</span></label>
+              <input required name="total_seats" type="number" min="1" max="10" placeholder="3"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Cost per Person (₹)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                <input name="estimated_cost" type="number" min="0" placeholder="0 for free"
+                  className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Vehicle Type</label>
+            <div className="flex flex-wrap gap-2">
+              {VEHICLE_TYPES.map(v => (
+                <label key={v} className="cursor-pointer">
+                  <input type="radio" name="vehicle_type" value={v} className="sr-only peer" />
+                  <span className="px-3 py-1.5 rounded-lg border text-xs font-medium transition-all border-gray-200 text-gray-600 hover:border-gray-400 peer-checked:border-black peer-checked:bg-black peer-checked:text-white">
+                    {v}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Notes</label>
+            <textarea name="notes" rows={2} placeholder="e.g. Meet at main gate, luggage space available..."
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all resize-none" />
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 bg-amber-50 text-amber-700 text-xs px-4 py-3 rounded-xl border border-amber-100">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>Ride creators are responsible for passenger safety. Ensure your vehicle is registered and insured.</span>
+        </div>
+
+        <div className="flex gap-3">
+          <a href="/dashboard/rides" className="flex-1 py-3.5 text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            Cancel
+          </a>
+          <button type="submit" disabled={isPending}
+            className="flex-1 py-3.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending ? 'Publishing...' : 'Publish Ride'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -13,32 +13,57 @@ export async function updateProfile(
   formData: FormData
 ): Promise<UpdateProfileState> {
   const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'You must be signed in.' };
+  }
 
   const fullName = (formData.get('full_name') as string)?.trim();
   const department = (formData.get('department') as string)?.trim();
   const year = (formData.get('year') as string)?.trim();
   const studentId = (formData.get('student_id') as string)?.trim();
   const bio = (formData.get('bio') as string)?.trim();
+  const avatarUrl = (formData.get('avatar_url') as string)?.trim();
 
   if (!fullName) {
     return { success: false, error: 'Full name is required.' };
   }
 
-  const { error } = await supabase.auth.updateUser({
+  // Update auth metadata
+  await supabase.auth.updateUser({
     data: {
       full_name: fullName,
       department: department || null,
       year: year || null,
       student_id: studentId || null,
       bio: bio || null,
+      avatar_url: avatarUrl || null,
     },
   });
 
-  if (error) {
-    return { success: false, error: error.message };
+  // Update real profiles table
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      full_name: fullName,
+      department: department || null,
+      year: year || null,
+      student_id: studentId || null,
+      bio: bio || null,
+      avatar_url: avatarUrl || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (profileError) {
+    console.error('[updateProfile] DB error:', profileError);
+    return { success: false, error: profileError.message };
   }
 
   revalidatePath('/dashboard/profile');
+  revalidatePath('/dashboard/profile/settings');
+  revalidatePath('/dashboard');
   return { success: true, error: null };
 }
 
