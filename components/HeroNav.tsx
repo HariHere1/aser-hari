@@ -1,7 +1,14 @@
 import React from 'react';
 import { Network } from 'lucide-react';
+import { createClientServer } from '@/lib/supabase-server';
+import { signOut } from '@/app/actions/auth';
 
-export const HeroNav = () => {
+export const HeroNav = async () => {
+  const supabase = await createClientServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <nav className="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-2">
@@ -21,15 +28,36 @@ export const HeroNav = () => {
         </a>
       </div>
 
-      <div className="flex items-center gap-6">
-        <a href="/login" className="text-sm text-gray-700 hover:text-black transition-colors">
-          Login
-        </a>
-        <a href="/signup">
-          <button className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
-            Join Campus
-          </button>
-        </a>
+      <div className="flex items-center gap-4">
+        {user ? (
+          <>
+            <a
+              href="/dashboard"
+              className="text-sm text-gray-700 hover:text-black transition-colors font-medium"
+            >
+              Dashboard
+            </a>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                Sign Out
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <a href="/login" className="text-sm text-gray-700 hover:text-black transition-colors">
+              Login
+            </a>
+            <a href="/signup">
+              <button className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
+                Join Campus
+              </button>
+            </a>
+          </>
+        )}
       </div>
     </nav>
   );

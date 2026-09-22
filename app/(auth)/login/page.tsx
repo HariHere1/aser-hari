@@ -13,8 +13,9 @@ const initialState = { error: null as string | null };
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const resolvedSearchParams = React.use(searchParams);
   const [state, formAction] = useActionState(signIn, initialState);
   const [isPending, startTransition] = useTransition();
 
@@ -30,7 +31,7 @@ export default function LoginPage({
     });
   };
 
-  const callbackError = searchParams?.error;
+  const callbackError = resolvedSearchParams?.error;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
