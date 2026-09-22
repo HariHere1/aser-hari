@@ -9,8 +9,9 @@ const LEVEL_COLORS: Record<string, string> = {
   Expert: 'bg-violet-100 text-violet-700',
 };
 
-function SkillCard({ skill }: { skill: Skill }) {
+function SkillCard({ skill, currentUserId }: { skill: Skill; currentUserId?: string }) {
   const owner = skill.owner;
+  const isOwner = !!currentUserId && skill.owner_id === currentUserId;
   const levelColor = LEVEL_COLORS[skill.level ?? ''] ?? 'bg-gray-100 text-gray-600';
 
   const rateLabel =
@@ -30,11 +31,18 @@ function SkillCard({ skill }: { skill: Skill }) {
           <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-colors">
             <Lightbulb className="w-5 h-5 text-gray-500" />
           </div>
-          {skill.level && (
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${levelColor}`}>
-              {skill.level}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            {isOwner && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                Your Skill
+              </span>
+            )}
+            {skill.level && (
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${levelColor}`}>
+                {skill.level}
+              </span>
+            )}
+          </div>
         </div>
 
         <h3 className="font-semibold text-gray-900 text-sm mb-1">{skill.title}</h3>
@@ -44,7 +52,7 @@ function SkillCard({ skill }: { skill: Skill }) {
 
         {owner && (
           <p className="text-xs text-gray-500 mb-3">
-            {owner.full_name}
+            {isOwner ? 'You (Instructor)' : owner.full_name}
             {owner.department ? ` · ${owner.department}` : ''}
             {owner.year ? ` ${owner.year}` : ''}
           </p>
@@ -70,8 +78,14 @@ function SkillCard({ skill }: { skill: Skill }) {
       </div>
 
       <div className="mt-4 pt-0">
-        <span className="block text-center w-full py-2 bg-black text-white text-xs font-medium rounded-lg group-hover:bg-gray-800 transition-colors">
-          View & Request Session
+        <span
+          className={`block text-center w-full py-2 text-xs font-medium rounded-lg transition-colors ${
+            isOwner
+              ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
+              : 'bg-black text-white group-hover:bg-gray-800'
+          }`}
+        >
+          {isOwner ? 'Your Skill' : 'View & Request Session'}
         </span>
       </div>
     </a>
@@ -82,6 +96,7 @@ const LEVELS = ['All', 'Beginner', 'Intermediate', 'Expert'];
 
 export default async function SkillsPage() {
   const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: skills, error } = await supabase
     .from('skills')
@@ -142,7 +157,7 @@ export default async function SkillsPage() {
 
       {items.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((skill) => <SkillCard key={skill.id} skill={skill} />)}
+          {items.map((skill) => <SkillCard key={skill.id} skill={skill} currentUserId={user?.id} />)}
         </div>
       ) : !error ? (
         <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center">

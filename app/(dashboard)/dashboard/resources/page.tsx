@@ -11,8 +11,9 @@ const METHOD_COLORS: Record<string, string> = {
   Free: 'bg-green-100 text-green-700',
 };
 
-function ResourceCard({ resource }: { resource: Resource }) {
+function ResourceCard({ resource, currentUserId }: { resource: Resource; currentUserId?: string }) {
   const owner = resource.owner;
+  const isOwner = !!currentUserId && resource.owner_id === currentUserId;
   const img = resource.image_urls?.[0];
   const methodColor = METHOD_COLORS[resource.method ?? ''] ?? 'bg-gray-100 text-gray-700';
 
@@ -33,6 +34,11 @@ function ResourceCard({ resource }: { resource: Resource }) {
           ) : (
             <Package className="w-12 h-12 text-gray-200 group-hover:text-gray-300 transition-colors" />
           )}
+          {isOwner && (
+            <span className="absolute top-3 left-3 text-xs font-semibold px-2.5 py-0.5 bg-black/80 text-white rounded-full backdrop-blur-sm">
+              Your Listing
+            </span>
+          )}
         </div>
 
         <div className="p-4">
@@ -52,7 +58,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
 
           {owner && (
             <p className="text-xs text-gray-500 mb-3">
-              {owner.full_name}
+              {isOwner ? 'You (Owner)' : owner.full_name}
               {owner.department ? ` · ${owner.department}` : ''}
               {owner.year ? ` ${owner.year}` : ''}
             </p>
@@ -85,8 +91,14 @@ function ResourceCard({ resource }: { resource: Resource }) {
       </div>
 
       <div className="p-4 pt-0">
-        <span className="block text-center w-full py-2 bg-black text-white text-xs font-medium rounded-lg group-hover:bg-gray-800 transition-colors">
-          View & Request
+        <span
+          className={`block text-center w-full py-2 text-xs font-medium rounded-lg transition-colors ${
+            isOwner
+              ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
+              : 'bg-black text-white group-hover:bg-gray-800'
+          }`}
+        >
+          {isOwner ? 'Your Listing' : 'View & Request'}
         </span>
       </div>
     </a>
@@ -98,6 +110,7 @@ const METHODS = ['All', 'Borrow', 'Sell', 'Rent', 'Lend'];
 
 export default async function ResourcesBrowsePage() {
   const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: resources, error } = await supabase
     .from('resources')
@@ -180,7 +193,7 @@ export default async function ResourcesBrowsePage() {
       {items.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
+            <ResourceCard key={resource.id} resource={resource} currentUserId={user?.id} />
           ))}
         </div>
       ) : !error ? (

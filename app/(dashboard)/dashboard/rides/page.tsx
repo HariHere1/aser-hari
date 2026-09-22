@@ -3,8 +3,9 @@ import { Plus, Search, MapPin, Clock, Users, ArrowRight, Car } from 'lucide-reac
 import { createClientServer } from '@/lib/supabase-server';
 import type { Ride } from '@/lib/database.types';
 
-function RideCard({ ride }: { ride: Ride }) {
+function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string }) {
   const creator = ride.creator;
+  const isOwner = !!currentUserId && ride.creator_id === currentUserId;
 
   return (
     <a
@@ -24,6 +25,11 @@ function RideCard({ ride }: { ride: Ride }) {
               <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
               <span className="font-semibold text-gray-900">{ride.to_location}</span>
             </div>
+            {isOwner && (
+              <span className="text-xs font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
+                You are Host
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
@@ -48,7 +54,9 @@ function RideCard({ ride }: { ride: Ride }) {
               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
                 {creator.full_name[0]}
               </div>
-              <span className="text-xs text-gray-600">{creator.full_name}</span>
+              <span className="text-xs text-gray-600">
+                {isOwner ? 'You (Driver)' : creator.full_name}
+              </span>
               {creator.department && (
                 <>
                   <span className="text-xs text-gray-300">·</span>
@@ -75,9 +83,13 @@ function RideCard({ ride }: { ride: Ride }) {
             <p className="text-xs text-gray-400">per person</p>
           </div>
           <span
-            className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-xl group-hover:bg-gray-800 transition-colors whitespace-nowrap"
+            className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-colors whitespace-nowrap ${
+              isOwner
+                ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
+                : 'bg-black text-white group-hover:bg-gray-800'
+            }`}
           >
-            {ride.available_seats === 0 ? 'View Details' : 'View / Request Seat'}
+            {isOwner ? 'Your Ride' : ride.available_seats === 0 ? 'View Details' : 'View / Request Seat'}
           </span>
         </div>
       </div>
@@ -87,6 +99,7 @@ function RideCard({ ride }: { ride: Ride }) {
 
 export default async function RidesBrowsePage() {
   const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: rides, error } = await supabase
     .from('rides')
@@ -161,7 +174,7 @@ export default async function RidesBrowsePage() {
 
       {items.length > 0 ? (
         <div className="space-y-3">
-          {items.map((ride) => <RideCard key={ride.id} ride={ride} />)}
+          {items.map((ride) => <RideCard key={ride.id} ride={ride} currentUserId={user?.id} />)}
         </div>
       ) : !error ? (
         <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center">

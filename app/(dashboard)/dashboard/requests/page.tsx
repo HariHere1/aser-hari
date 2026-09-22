@@ -9,8 +9,9 @@ const STATUS_COLORS: Record<string, string> = {
   closed: 'bg-gray-100 text-gray-500',
 };
 
-function NeedCard({ need }: { need: Need }) {
+function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string }) {
   const poster = need.poster;
+  const isOwner = !!currentUserId && need.poster_id === currentUserId;
   const statusColor = STATUS_COLORS[need.status] ?? 'bg-gray-100 text-gray-600';
 
   const budgetLabel =
@@ -47,13 +48,18 @@ function NeedCard({ need }: { need: Need }) {
                   Urgent
                 </span>
               )}
+              {isOwner && (
+                <span className="text-xs font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
+                  Your Request
+                </span>
+              )}
             </div>
             <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{need.title}</h3>
             {need.description && (
               <p className="text-xs text-gray-400 line-clamp-2 mb-1">{need.description}</p>
             )}
             <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-              {poster && <span>{poster.full_name}</span>}
+              {poster && <span>{isOwner ? 'You (Requester)' : poster.full_name}</span>}
               {poster?.department && <span>· {poster.department}{poster.year ? ` ${poster.year}` : ''}</span>}
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
@@ -75,8 +81,14 @@ function NeedCard({ need }: { need: Need }) {
             </div>
           </div>
         </div>
-        <span className="flex-shrink-0 px-4 py-2 bg-black text-white text-xs font-medium rounded-lg group-hover:bg-gray-800 transition-colors">
-          View & Help
+        <span
+          className={`flex-shrink-0 px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
+            isOwner
+              ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
+              : 'bg-black text-white group-hover:bg-gray-800'
+          }`}
+        >
+          {isOwner ? 'Your Request' : 'View & Help'}
         </span>
       </div>
     </a>
@@ -87,6 +99,7 @@ const CATEGORIES_FILTER = ['All', 'Electronics', 'Books', 'Rides', 'Tools', 'Oth
 
 export default async function RequestsPage() {
   const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: needs, error } = await supabase
     .from('needs')
@@ -149,7 +162,7 @@ export default async function RequestsPage() {
 
       {items.length > 0 ? (
         <div className="space-y-3">
-          {items.map((need) => <NeedCard key={need.id} need={need} />)}
+          {items.map((need) => <NeedCard key={need.id} need={need} currentUserId={user?.id} />)}
         </div>
       ) : !error ? (
         <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center">

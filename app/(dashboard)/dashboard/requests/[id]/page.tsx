@@ -4,7 +4,8 @@ import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, HelpCircle, MessageSquare,
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
 
-export default async function NeedDetailPage({ params }: { params: { id: string } }) {
+export default async function NeedDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,7 +16,7 @@ export default async function NeedDetailPage({ params }: { params: { id: string 
       poster:profiles!poster_id(*),
       category:categories(*)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !need) {
@@ -27,6 +28,7 @@ export default async function NeedDetailPage({ params }: { params: { id: string 
 
   async function handleContact() {
     'use server';
+    if (user?.id === need.poster_id) return;
     await startConversation({
       targetUserId: need.poster_id,
       needId: need.id,
@@ -187,8 +189,9 @@ export default async function NeedDetailPage({ params }: { params: { id: string 
                 </button>
               </form>
             ) : (
-              <div className="p-3 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-xl text-center">
-                This is your request
+              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
+                <p className="font-semibold text-gray-900">Your Request</p>
+                <p className="text-gray-500">You posted this request. Other students will view it and contact you to offer help.</p>
               </div>
             )}
           </div>

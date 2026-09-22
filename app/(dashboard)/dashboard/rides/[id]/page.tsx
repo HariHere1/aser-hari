@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Car, Star, ShieldCheck, Me
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
 
-export default async function RideDetailPage({ params }: { params: { id: string } }) {
+export default async function RideDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -14,7 +15,7 @@ export default async function RideDetailPage({ params }: { params: { id: string 
       *,
       creator:profiles!creator_id(*)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !ride) {
@@ -26,6 +27,7 @@ export default async function RideDetailPage({ params }: { params: { id: string 
 
   async function handleContact() {
     'use server';
+    if (user?.id === ride.creator_id) return;
     await startConversation({
       targetUserId: ride.creator_id,
       rideId: ride.id,
@@ -187,8 +189,9 @@ export default async function RideDetailPage({ params }: { params: { id: string 
                 </button>
               </form>
             ) : (
-              <div className="p-3 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-xl text-center">
-                This is your ride offer
+              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
+                <p className="font-semibold text-gray-900">Your Ride Offer</p>
+                <p className="text-gray-500">You posted this ride. Other students can view and contact you to request seats.</p>
               </div>
             )}
           </div>

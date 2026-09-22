@@ -2,7 +2,8 @@ import { createClientServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import ChatRoom from '@/components/chat/ChatRoom';
 
-export default async function ChatRoomPage({ params }: { params: { id: string } }) {
+export default async function ChatRoomPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return notFound();
@@ -11,7 +12,7 @@ export default async function ChatRoomPage({ params }: { params: { id: string } 
   const { data: participant } = await supabase
     .from('conversation_participants')
     .select('profile_id')
-    .eq('conversation_id', params.id)
+    .eq('conversation_id', id)
     .eq('profile_id', user.id)   // ← correct column: profile_id
     .single();
 
@@ -27,7 +28,7 @@ export default async function ChatRoomPage({ params }: { params: { id: string } 
       ride:rides(id, from_location, to_location, ride_date, ride_time, estimated_cost, status),
       skill:skills(id, title, rate, rate_unit, level, is_active)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   const conversation = rawConversation ? {
@@ -42,13 +43,13 @@ export default async function ChatRoomPage({ params }: { params: { id: string } 
   const { data: participants } = await supabase
     .from('conversation_participants')
     .select('profile_id, profile:profiles(id, full_name, department, year, is_verified, avatar_url)')
-    .eq('conversation_id', params.id);
+    .eq('conversation_id', id);
 
   // Load existing messages
   const { data: messages, error: msgError } = await supabase
     .from('messages')
     .select('id, body, image_url, created_at, sender_id, sender:profiles!sender_id(id, full_name, avatar_url)')
-    .eq('conversation_id', params.id)
+    .eq('conversation_id', id)
     .order('created_at', { ascending: true })
     .limit(100);
 
@@ -71,12 +72,12 @@ export default async function ChatRoomPage({ params }: { params: { id: string } 
   await supabase
     .from('conversation_participants')
     .update({ last_read_at: new Date().toISOString() })
-    .eq('conversation_id', params.id)
+    .eq('conversation_id', id)
     .eq('profile_id', user.id);
 
   return (
     <ChatRoom
-      conversationId={params.id}
+      conversationId={id}
       currentUserId={user.id}
       initialMessages={normMessages}
       otherProfile={otherProfileRaw ?? null}

@@ -4,7 +4,8 @@ import { ArrowLeft, Clock, Star, ShieldCheck, Lightbulb, MessageSquare } from 'l
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
 
-export default async function SkillDetailPage({ params }: { params: { id: string } }) {
+export default async function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,7 +16,7 @@ export default async function SkillDetailPage({ params }: { params: { id: string
       owner:profiles!owner_id(*),
       category:categories(*)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !skill) {
@@ -27,6 +28,7 @@ export default async function SkillDetailPage({ params }: { params: { id: string
 
   async function handleContact() {
     'use server';
+    if (user?.id === skill.owner_id) return;
     await startConversation({
       targetUserId: skill.owner_id,
       skillId: skill.id,
@@ -162,8 +164,9 @@ export default async function SkillDetailPage({ params }: { params: { id: string
                 </button>
               </form>
             ) : (
-              <div className="p-3 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-xl text-center">
-                This is your skill listing
+              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
+                <p className="font-semibold text-gray-900">Your Skill Listing</p>
+                <p className="text-gray-500">You posted this skill. Other students will view it and contact you to request mentorship or exchange.</p>
               </div>
             )}
           </div>

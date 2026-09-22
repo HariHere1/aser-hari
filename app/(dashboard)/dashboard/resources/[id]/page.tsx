@@ -4,7 +4,8 @@ import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, Tag, AlertCircle, MessageS
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
 
-export default async function ResourceDetailPage({ params }: { params: { id: string } }) {
+export default async function ResourceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,7 +16,7 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
       owner:profiles!owner_id(*),
       category:categories(*)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !resource) {
@@ -27,6 +28,7 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
 
   async function handleMessage() {
     'use server';
+    if (user?.id === resource.owner_id) return;
     await startConversation({
       targetUserId: resource.owner_id,
       resourceId: resource.id,
@@ -201,8 +203,9 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
                 </button>
               </form>
             ) : (
-              <div className="p-3 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-xl text-center">
-                This is your listing
+              <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
+                <p className="font-semibold text-gray-900">Your Resource Listing</p>
+                <p className="text-gray-500">You posted this item. Other students can view and message you to borrow, buy, or rent.</p>
               </div>
             )}
           </div>
