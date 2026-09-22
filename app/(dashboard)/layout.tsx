@@ -1,12 +1,21 @@
-'use client';
+import React from 'react';
+import { Bell, Network } from 'lucide-react';
+import { createClientServer } from '@/lib/supabase-server';
+import { signOut } from '@/app/actions/auth';
+import { MobileMenuWrapper } from '@/app/(dashboard)/MobileMenuWrapper';
 
-import React, { useState } from 'react';
-import { Search, Bell, User, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Student';
+  const initials = displayName
+    .split(' ')
+    .map((n: string) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <div className="min-h-screen bg-white">
@@ -14,13 +23,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <a href="/" className="text-lg font-bold tracking-tight">CampusNet</a>
+            <a href="/dashboard" className="flex items-center gap-2">
+              <Network className="w-4 h-4" />
+              <span className="text-base font-bold tracking-tight">CampusNet</span>
+            </a>
 
             <div className="hidden md:flex items-center gap-6">
-              <a href="/resources" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Resources</a>
-              <a href="/requests" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">I Need</a>
-              <a href="/rides" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Rides</a>
-              <a href="/skills" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Skills</a>
+              <a href="/dashboard/resources" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Resources</a>
+              <a href="/dashboard/requests" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">I Need</a>
+              <a href="/dashboard/rides" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Rides</a>
+              <a href="/dashboard/skills" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Skills</a>
             </div>
           </div>
 
@@ -29,31 +41,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
             </button>
-            <div className="h-8 w-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden cursor-pointer">
-              <User className="w-5 h-5 text-gray-500" />
-            </div>
-            <button
-              className="md:hidden p-2 text-gray-600"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+
+            {/* User avatar + sign out */}
+            <form action={signOut}>
+              <button
+                type="submit"
+                title="Sign out"
+                className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold hover:bg-gray-800 transition-colors cursor-pointer"
+              >
+                {initials}
+              </button>
+            </form>
+
+            {/* Mobile hamburger */}
+            <MobileMenuWrapper />
           </div>
         </div>
       </nav>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white pt-16 md:hidden animate-fade-in-overlay">
-          <div className="flex flex-col p-6 gap-6">
-            <a href="/resources" className="text-lg font-medium py-2 border-b border-gray-100">Resources</a>
-            <a href="/requests" className="text-lg font-medium py-2 border-b border-gray-100">I Need</a>
-            <a href="/rides" className="text-lg font-medium py-2 border-b border-gray-100">Rides</a>
-            <a href="/skills" className="text-lg font-medium py-2 border-b border-gray-100">Skills</a>
-            <a href="/profile" className="text-lg font-medium py-2">My Profile</a>
-          </div>
-        </div>
-      )}
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {children}

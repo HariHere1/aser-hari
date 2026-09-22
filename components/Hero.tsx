@@ -9,10 +9,10 @@ import { HeroLogos } from './HeroLogos';
 import { FeaturesSection, HowItWorksSection } from './LandingDetails';
 
 export const Hero = () => {
-  const [activeTab, setActiveTab] = useState('analyse');
+  const [activeTab, setActiveTab] = useState('resources');
 
   useEffect(() => {
-    const tabs = ['analyse', 'train', 'testing', 'deploy'];
+    const tabs = ['resources', 'needs', 'rides', 'skills'];
     const interval = setInterval(() => {
       setActiveTab((prev) => {
         const currentIndex = tabs.indexOf(prev);
@@ -55,15 +55,23 @@ export const Hero = () => {
       {/* Final CTA Section */}
       <section className="py-24 bg-white text-center px-6">
         <div style={{ opacity: 0, animationDelay: '0.1s' }} className="animate-fade-in-up max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-normal tracking-tight mb-6">Ready to simplify <br />your campus life?</h2>
-          <p className="text-gray-600 text-lg mb-10">Join thousands of students already sharing and connecting.</p>
+          <h2 className="text-4xl md:text-6xl font-normal tracking-tight mb-6">
+            Ready to connect<br />your campus?
+          </h2>
+          <p className="text-gray-600 text-lg mb-10">
+            Join verified students already sharing resources, rides, and skills on their campus.
+          </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="bg-black text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all w-full sm:w-auto">
-              Get Started Free
-            </button>
-            <button className="bg-white text-black border border-gray-200 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-50 transition-all w-full sm:w-auto">
-              Learn More
-            </button>
+            <a href="/signup">
+              <button className="bg-black text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all w-full sm:w-auto">
+                Join Your Campus Free
+              </button>
+            </a>
+            <a href="#how-it-works">
+              <button className="bg-white text-black border border-gray-200 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-50 transition-all w-full sm:w-auto">
+                Learn More
+              </button>
+            </a>
           </div>
         </div>
       </section>
