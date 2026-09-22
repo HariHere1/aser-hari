@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, Star, ShieldCheck, Lightbulb, MessageSquare } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { getWhatsAppUrl } from '@/lib/phone';
 
 export default async function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +29,14 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
   const owner = skill.owner;
   const isOwner = user?.id === skill.owner_id;
+
+  const hasWhatsApp = Boolean(owner?.whatsapp_enabled && owner?.phone_number);
+  const whatsAppUrl = hasWhatsApp && owner?.phone_number
+    ? getWhatsAppUrl(
+        owner.phone_number,
+        `Hi ${owner.full_name || 'there'}, I saw your skill on CampusNet: "${skill.title}". I would love to connect!`
+      )
+    : null;
 
   async function handleContact() {
     'use server';
@@ -158,15 +168,21 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             )}
 
             {!isOwner ? (
-              <form action={handleContact}>
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Contact Owner / Request Session</span>
-                </button>
-              </form>
+              <div className="space-y-2.5">
+                <form action={handleContact}>
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>CampusNet Chat</span>
+                  </button>
+                </form>
+
+                {whatsAppUrl && (
+                  <WhatsAppButton href={whatsAppUrl} />
+                )}
+              </div>
             ) : (
               <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
                 <p className="font-semibold text-gray-900">Your Skill Listing</p>

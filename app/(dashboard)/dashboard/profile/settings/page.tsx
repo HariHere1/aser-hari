@@ -26,6 +26,9 @@ export default async function ProfileSettingsPage() {
   const bio = profile?.bio ?? user.user_metadata?.bio ?? null;
   const avatarUrl = profile?.avatar_url ?? user.user_metadata?.avatar_url ?? null;
 
+  const phoneNumber = profile?.phone_number ?? user.user_metadata?.phone_number ?? null;
+  const whatsappEnabled = profile?.whatsapp_enabled ?? user.user_metadata?.whatsapp_enabled ?? false;
+
   // Detect OAuth users (Google etc.) — they can't change password
   const identities = user.identities ?? [];
   const isOAuth = identities.some((id) => id.provider !== 'email');
@@ -39,6 +42,8 @@ export default async function ProfileSettingsPage() {
       studentId={studentId}
       bio={bio}
       avatarUrl={avatarUrl}
+      phoneNumber={phoneNumber}
+      whatsappEnabled={whatsappEnabled}
       isOAuth={isOAuth}
     />
   );

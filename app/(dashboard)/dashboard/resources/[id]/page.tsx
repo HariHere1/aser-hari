@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, Tag, AlertCircle, MessageSquare, Package } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { getWhatsAppUrl } from '@/lib/phone';
 
 export default async function ResourceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +29,14 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
 
   const owner = resource.owner;
   const isOwner = user?.id === resource.owner_id;
+
+  const hasWhatsApp = Boolean(owner?.whatsapp_enabled && owner?.phone_number);
+  const whatsAppUrl = hasWhatsApp && owner?.phone_number
+    ? getWhatsAppUrl(
+        owner.phone_number,
+        `Hi ${owner.full_name || 'there'}, I saw your listing on CampusNet: "${resource.title}". Is it still available?`
+      )
+    : null;
 
   async function handleMessage() {
     'use server';
@@ -203,17 +213,23 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
               <p className="text-sm text-gray-500">Campus Student</p>
             )}
 
-            {/* Action Button */}
+            {/* Action Buttons */}
             {!isOwner ? (
-              <form action={handleMessage}>
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Message Owner</span>
-                </button>
-              </form>
+              <div className="space-y-2.5">
+                <form action={handleMessage}>
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>CampusNet Chat</span>
+                  </button>
+                </form>
+
+                {whatsAppUrl && (
+                  <WhatsAppButton href={whatsAppUrl} />
+                )}
+              </div>
             ) : (
               <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
                 <p className="font-semibold text-gray-900">Your Resource Listing</p>

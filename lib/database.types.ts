@@ -13,6 +13,8 @@ export type Profile = {
   is_verified: boolean;
   rating: number;
   rating_count: number;
+  phone_number?: string | null;
+  whatsapp_enabled?: boolean;
   created_at: string;
   updated_at: string;
 };

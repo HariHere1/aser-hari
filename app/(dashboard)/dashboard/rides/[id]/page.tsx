@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Car, Star, ShieldCheck, MessageSquare } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { getWhatsAppUrl } from '@/lib/phone';
 
 export default async function RideDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +28,14 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
 
   const creator = ride.creator;
   const isCreator = user?.id === ride.creator_id;
+
+  const hasWhatsApp = Boolean(creator?.whatsapp_enabled && creator?.phone_number);
+  const whatsAppUrl = hasWhatsApp && creator?.phone_number
+    ? getWhatsAppUrl(
+        creator.phone_number,
+        `Hi ${creator.full_name || 'there'}, I saw your ride offer on CampusNet: "${ride.origin} → ${ride.destination}". Are there seats available?`
+      )
+    : null;
 
   async function handleContact() {
     'use server';
@@ -182,16 +192,22 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
             )}
 
             {!isCreator ? (
-              <form action={handleContact}>
-                <button
-                  type="submit"
-                  disabled={ride.available_seats === 0}
-                  className="w-full py-3.5 bg-black hover:bg-gray-800 disabled:opacity-50 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{ride.available_seats === 0 ? 'Ride Full' : 'Contact Creator / Request Seat'}</span>
-                </button>
-              </form>
+              <div className="space-y-2.5">
+                <form action={handleContact}>
+                  <button
+                    type="submit"
+                    disabled={ride.available_seats === 0}
+                    className="w-full py-3.5 bg-black hover:bg-gray-800 disabled:opacity-50 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>{ride.available_seats === 0 ? 'Ride Full' : 'CampusNet Chat'}</span>
+                  </button>
+                </form>
+
+                {whatsAppUrl && ride.available_seats > 0 && (
+                  <WhatsAppButton href={whatsAppUrl} />
+                )}
+              </div>
             ) : (
               <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
                 <p className="font-semibold text-gray-900">Your Ride Offer</p>

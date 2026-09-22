@@ -30,6 +30,30 @@ export async function updateProfile(
     return { success: false, error: 'Full name is required.' };
   }
 
+  const rawPhone = (formData.get('phone_number') as string)?.trim();
+  const whatsappCheckbox = formData.get('whatsapp_enabled');
+  const wantsWhatsapp = whatsappCheckbox === 'on' || whatsappCheckbox === 'true' || whatsappCheckbox === '1';
+
+  let finalPhoneNumber: string | null = null;
+  let finalWhatsappEnabled = false;
+
+  if (rawPhone) {
+    const { validateAndNormalizeIndianPhone } = await import('@/lib/phone');
+    const phoneValidation = validateAndNormalizeIndianPhone(rawPhone);
+    if (!phoneValidation.valid) {
+      return { success: false, error: phoneValidation.error || 'Please enter a valid Indian phone number.' };
+    }
+    finalPhoneNumber = phoneValidation.normalized ?? null;
+    finalWhatsappEnabled = wantsWhatsapp;
+  } else {
+    // If no phone number is provided but WhatsApp is toggled on, reject
+    if (wantsWhatsapp) {
+      return { success: false, error: 'A valid phone number is required to enable WhatsApp contact.' };
+    }
+    finalPhoneNumber = null;
+    finalWhatsappEnabled = false;
+  }
+
   // Update auth metadata
   await supabase.auth.updateUser({
     data: {
@@ -39,13 +63,33 @@ export async function updateProfile(
       student_id: studentId || null,
       bio: bio || null,
       avatar_url: avatarUrl || null,
+      phone_number: finalPhoneNumber,
+      whatsapp_enabled: finalWhatsappEnabled,
     },
   });
 
   // Update real profiles table
-  const { error: profileError } = await supabase
+  const updatePayload: Record<string, any> = {
+    full_name: fullName,
+    department: department || null,
+    year: year || null,
+    student_id: studentId || null,
+    bio: bio || null,
+    avatar_url: avatarUrl || null,
+    phone_number: finalPhoneNumber,
+    whatsapp_enabled: finalWhatsappEnabled,
+    updated_at: new Date().toISOString(),
+  };
+
+  let { error: profileError } = await supabase
     .from('profiles')
-    .update({
+    .update(updatePayload)
+    .eq('id', user.id);
+
+  // Graceful fallback if database migration hasn't been applied yet in remote Supabase
+  if (profileError && (profileError.message?.includes('phone_number') || profileError.code === '42703' || profileError.code === 'PGRST204')) {
+    console.warn('[updateProfile] phone_number/whatsapp_enabled column not yet in DB schema. Falling back to core fields. Apply migration 20260922_add_phone_number_and_whatsapp_to_profiles.sql.');
+    const fallbackPayload = {
       full_name: fullName,
       department: department || null,
       year: year || null,
@@ -53,8 +97,13 @@ export async function updateProfile(
       bio: bio || null,
       avatar_url: avatarUrl || null,
       updated_at: new Date().toISOString(),
-    })
-    .eq('id', user.id);
+    };
+    const { error: fallbackErr } = await supabase
+      .from('profiles')
+      .update(fallbackPayload)
+      .eq('id', user.id);
+    profileError = fallbackErr;
+  }
 
   if (profileError) {
     console.error('[updateProfile] DB error:', profileError);

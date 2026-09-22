@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, HelpCircle, MessageSquare, AlertCircle } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { startConversation } from '@/app/actions/chat';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { getWhatsAppUrl } from '@/lib/phone';
 
 export default async function NeedDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +29,14 @@ export default async function NeedDetailPage({ params }: { params: Promise<{ id:
 
   const poster = need.poster;
   const isPoster = user?.id === need.poster_id;
+
+  const hasWhatsApp = Boolean(poster?.whatsapp_enabled && poster?.phone_number);
+  const whatsAppUrl = hasWhatsApp && poster?.phone_number
+    ? getWhatsAppUrl(
+        poster.phone_number,
+        `Hi ${poster.full_name || 'there'}, I saw your request on CampusNet: "${need.title}". I might be able to help!`
+      )
+    : null;
 
   async function handleContact() {
     'use server';
@@ -188,15 +198,21 @@ export default async function NeedDetailPage({ params }: { params: Promise<{ id:
             )}
 
             {!isPoster ? (
-              <form action={handleContact}>
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Contact Poster</span>
-                </button>
-              </form>
+              <div className="space-y-2.5">
+                <form action={handleContact}>
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>CampusNet Chat</span>
+                  </button>
+                </form>
+
+                {whatsAppUrl && (
+                  <WhatsAppButton href={whatsAppUrl} />
+                )}
+              </div>
             ) : (
               <div className="p-4 bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-2xl text-center space-y-1">
                 <p className="font-semibold text-gray-900">Your Request</p>

@@ -3,7 +3,8 @@
 import React, { useActionState, useTransition } from 'react';
 import { updateProfile, updatePassword, UpdateProfileState } from '@/app/actions/profile';
 import { signOut } from '@/app/actions/auth';
-import { User, Lock, LogOut, CheckCircle2, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, LogOut, CheckCircle2, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff, Phone } from 'lucide-react';
+import { formatPhoneDisplay } from '@/lib/phone';
 
 const INITIAL: UpdateProfileState = { success: false, error: null };
 
@@ -109,6 +110,8 @@ export function ProfileSettingsForm({
   studentId,
   bio,
   avatarUrl,
+  phoneNumber,
+  whatsappEnabled,
   isOAuth,
 }: {
   fullName: string;
@@ -118,12 +121,15 @@ export function ProfileSettingsForm({
   studentId: string | null;
   bio: string | null;
   avatarUrl?: string | null;
+  phoneNumber?: string | null;
+  whatsappEnabled?: boolean;
   isOAuth: boolean;
 }) {
   const [profileState, profileAction, isProfilePending] = useActionState(updateProfile, INITIAL);
   const [passwordState, passwordAction, isPasswordPending] = useActionState(updatePassword, INITIAL);
   const [avatar, setAvatar] = React.useState<string | null>(avatarUrl ?? null);
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
+  const [isWhatsAppOn, setIsWhatsAppOn] = React.useState(Boolean(whatsappEnabled));
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -267,6 +273,64 @@ export function ProfileSettingsForm({
                 rows={3}
               />
               <p className="text-xs text-gray-400 mt-1">Max 280 characters.</p>
+            </div>
+
+            {/* WhatsApp Contact Section */}
+            <div className="sm:col-span-2 pt-4 border-t border-gray-100 space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-gray-500" />
+                  Phone Number
+                </label>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Used for optional WhatsApp contact. Never displayed publicly as plain text.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                <div className="space-y-1.5">
+                  <input
+                    type="tel"
+                    name="phone_number"
+                    defaultValue={formatPhoneDisplay(phoneNumber)}
+                    placeholder="+91 XXXXX XXXXX"
+                    maxLength={18}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white focus:border-transparent transition-all font-mono"
+                  />
+                  <p className="text-xs text-gray-400">Accepts normal Indian numbers including +91.</p>
+                </div>
+
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-gray-800">WhatsApp Contact</span>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                        isWhatsAppOn 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {isWhatsAppOn ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      {isWhatsAppOn 
+                        ? 'Students can contact you via WhatsApp' 
+                        : 'Students can only contact you via CampusNet chat'}
+                    </p>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      name="whatsapp_enabled"
+                      checked={isWhatsAppOn}
+                      onChange={(e) => setIsWhatsAppOn(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
