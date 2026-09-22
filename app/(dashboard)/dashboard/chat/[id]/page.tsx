@@ -1,125 +1,120 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Send, Image as ImageIcon, MoreVertical, ArrowLeft, CheckCircle2, Clock, Package } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, ArrowLeft, MessageSquare } from 'lucide-react';
 
-export default function ChatPage({ params }: { params: { id: string } }) {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hey! I saw you have the ESP32 DevKit. Is it still available?", sender: 'other', time: '10:00 AM', type: 'text' },
-    { id: 2, text: "Yes it is! I can meet you at the Library tomorrow around 4pm.", sender: 'me', time: '10:05 AM', type: 'text' },
-    { id: 3, text: "That works for me. I'll bring the $5 for the rental.", sender: 'other', time: '10:10 AM', type: 'text' },
-  ]);
+type Message = { id: number; text: string; sender: 'me' | 'other'; time: string };
+
+function formatTime(date: Date) {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+export default function ChatConversationPage({ params }: { params: { id: string } }) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = () => {
-    if (!inputValue.trim()) return;
-    setMessages([...messages, { id: Date.now(), text: inputValue, sender: 'me', time: 'Now', type: 'text' }]);
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), text: trimmed, sender: 'me', time: formatTime(new Date()) },
+    ]);
     setInputValue('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   return (
-    <div className="h-[calc(100vh-120px)] flex gap-6">
-      {/* Chat List (Simplified for this view) */}
-      <div className="hidden lg:block w-80 space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold tracking-tight">Messages</h2>
-          <Button size="sm" variant="ghost">New</Button>
+    <div className="h-[calc(100vh-10rem)] flex gap-4">
+      {/* Sidebar */}
+      <div className="hidden lg:flex w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 flex-col overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-900">Messages</h2>
         </div>
-        {[
-          { name: 'Sarah K.', lastMsg: 'See you tomorrow!', time: '2m ago', active: true },
-          { name: 'David L.', lastMsg: 'Is it still available?', time: '1h ago', active: false },
-          { name: 'Emma W.', lastMsg: 'Thanks for the book!', time: '4h ago', active: false },
-        ].map((chat, i) => (
-          <Card key={i} className={`p-4 cursor-pointer transition-all ${chat.active ? 'border-black' : 'hover:border-gray-300'}`}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-medium">{chat.name}</span>
-              <span className="text-xs text-gray-400">{chat.time}</span>
-            </div>
-            <p className="text-sm text-gray-500 truncate">{chat.lastMsg}</p>
-          </Card>
-        ))}
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+          <MessageSquare className="w-8 h-8 text-gray-200 mb-3" />
+          <p className="text-xs text-gray-400">No other conversations yet.</p>
+        </div>
       </div>
 
-      {/* Main Chat Window */}
-      <Card className="flex-1 flex flex-col overflow-hidden relative">
+      {/* Main Chat */}
+      <div className="flex-1 bg-white rounded-2xl border border-gray-100 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="p-2 rounded-full mr-2">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-medium">S</div>
-            <div>
-              <p className="font-semibold text-sm">Sarah K.</p>
-              <p className="text-xs text-green-500">Online</p>
-            </div>
+        <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-white">
+          <a href="/dashboard/chat" className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+            <ArrowLeft className="w-4 h-4" />
+          </a>
+          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center font-semibold text-sm text-gray-600 flex-shrink-0">
+            ?
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="purple">Resource: ESP32</Badge>
-            <Button variant="ghost" size="sm" className="p-2 rounded-full">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
+          <div>
+            <p className="font-semibold text-sm text-gray-900">Conversation #{params.id}</p>
+            <p className="text-xs text-gray-400">Start messaging below</p>
           </div>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] p-3 rounded-2xl text-sm ${
-                msg.sender === 'me'
-                ? 'bg-black text-white rounded-tr-none'
-                : 'bg-white text-gray-900 border border-gray-100 rounded-tl-none shadow-sm'
-              }`}>
-                <p>{msg.text}</p>
-                <p className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-gray-400' : 'text-gray-300'}`}>
-                  {msg.time}
-                </p>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-gray-50/30">
+          {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center px-6">
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-4 border border-gray-100 shadow-sm">
+                <MessageSquare className="w-7 h-7 text-gray-200" />
               </div>
+              <p className="text-sm font-medium text-gray-600 mb-1">No messages yet</p>
+              <p className="text-xs text-gray-400 max-w-xs">
+                Send a message below to get the conversation started.
+              </p>
             </div>
-          ))}
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[75%] sm:max-w-[65%] p-3 rounded-2xl text-sm ${
+                  msg.sender === 'me'
+                    ? 'bg-black text-white rounded-tr-sm'
+                    : 'bg-white text-gray-900 border border-gray-100 rounded-tl-sm shadow-sm'
+                }`}>
+                  <p>{msg.text}</p>
+                  <p className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-gray-400' : 'text-gray-300'}`}>
+                    {msg.time}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
         </div>
 
-        {/* Transaction Overlay / Footer */}
-        <div className="p-4 border-t border-gray-100 bg-white space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gray-100 rounded-xl border border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                <Package className="w-4 h-4 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold">Resource Exchange</p>
-                <p className="text-[10px] text-gray-500">ESP32 DevKit • Reserved</p>
-              </div>
-            </div>
-            <Button size="sm" className="text-xs h-8">Confirm Handover</Button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="p-2 h-10 w-10 rounded-full">
-              <ImageIcon className="w-5 h-5 text-gray-400" />
-            </Button>
-            <div className="flex-1 relative">
-              <Input
-                placeholder="Type a message..."
-                className="rounded-full pr-12 py-3"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-              <button
-                onClick={sendMessage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all active:scale-90"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
+        {/* Input */}
+        <div className="p-4 border-t border-gray-100 bg-white">
+          <div className="flex items-center gap-2">
+            <input
+              placeholder="Type a message..."
+              className="flex-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!inputValue.trim()}
+              className="p-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Send className="w-4 h-4" />
+            </button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -1,22 +1,6 @@
 import React from 'react';
-import { Search, BookOpen, Users, MapPin, Plus, TrendingUp, Clock, Star, ShoppingBag, HelpCircle, Car, Lightbulb } from 'lucide-react';
+import { BookOpen, Users, MapPin, Plus, Clock, HelpCircle, Car, Lightbulb, Package, ArrowRight } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
-
-const MOCK_LISTINGS = [
-  { type: 'Resource', icon: ShoppingBag, title: 'ESP32 DevKit V1', price: 'Free', status: 'Borrow', badge: 'purple', user: 'Rahul K.', time: '2m ago' },
-  { type: 'Ride', icon: Car, title: 'Campus → Ernakulam', price: '₹50', status: '3 Seats', badge: 'orange', user: 'Ananya M.', time: '15m ago' },
-  { type: 'Skill', icon: Lightbulb, title: 'React & Next.js Tutoring', price: 'Exchange', status: 'Online', badge: 'blue', user: 'Joel P.', time: '1h ago' },
-  { type: 'Resource', icon: ShoppingBag, title: 'Calculus Textbook (Kreyszig)', price: '₹120', status: 'Sell', badge: 'purple', user: 'Priya R.', time: '2h ago' },
-  { type: 'Need', icon: HelpCircle, title: 'Need Arduino Uno for 2 days', price: 'Borrow', status: 'Urgent', badge: 'red', user: 'Arun S.', time: '3h ago' },
-];
-
-const BADGE_COLORS: Record<string, string> = {
-  purple: 'bg-purple-100 text-purple-700',
-  orange: 'bg-orange-100 text-orange-700',
-  blue: 'bg-blue-100 text-blue-700',
-  red: 'bg-red-100 text-red-700',
-  green: 'bg-green-100 text-green-700',
-};
 
 export default async function DashboardHomePage() {
   const supabase = await createClientServer();
@@ -28,17 +12,30 @@ export default async function DashboardHomePage() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const initials = displayName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
+  const hubs = [
+    { title: 'Resources', icon: BookOpen, path: '/dashboard/resources', desc: 'Books, tools & gear', bg: 'bg-violet-50', iconColor: 'text-violet-600', border: 'hover:border-violet-200' },
+    { title: 'Rides', icon: Car, path: '/dashboard/rides', desc: 'Carpool to campus', bg: 'bg-amber-50', iconColor: 'text-amber-600', border: 'hover:border-amber-200' },
+    { title: 'Skills', icon: Users, path: '/dashboard/skills', desc: 'Tutoring & mentoring', bg: 'bg-sky-50', iconColor: 'text-sky-600', border: 'hover:border-sky-200' },
+    { title: 'I Need', icon: HelpCircle, path: '/dashboard/requests', desc: 'Post a request', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', border: 'hover:border-emerald-200' },
+  ];
+
+  const quickActions = [
+    { label: 'Post a Resource', icon: Package, href: '/dashboard/resources/create', bg: 'bg-violet-100', iconColor: 'text-violet-600', hoverBg: 'hover:bg-violet-200' },
+    { label: 'Offer a Ride', icon: MapPin, href: '/dashboard/rides/create', bg: 'bg-amber-100', iconColor: 'text-amber-600', hoverBg: 'hover:bg-amber-200' },
+    { label: 'Add a Skill', icon: Lightbulb, href: '/dashboard/skills/my-skills', bg: 'bg-sky-100', iconColor: 'text-sky-600', hoverBg: 'hover:bg-sky-200' },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
             {greeting}, {firstName}! 👋
           </h1>
-          <p className="text-gray-500 mt-1">What do you need on campus today?</p>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">What do you need on campus today?</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <a href="/dashboard/resources/create">
             <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
               <Plus className="w-4 h-4" />
@@ -54,36 +51,16 @@ export default async function DashboardHomePage() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search className="w-5 h-5 text-gray-400" />
-        </div>
-        <input
-          type="text"
-          placeholder="Search resources, skills, rides, or people..."
-          className="w-full pl-12 pr-6 py-4 bg-white border border-gray-200 rounded-2xl text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-        />
-        <button className="absolute right-3 top-3 bottom-3 px-4 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-          Search
-        </button>
-      </div>
-
       {/* Quick Action Hubs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { title: 'Resources', icon: BookOpen, color: 'purple', path: '/dashboard/resources', desc: 'Books, Tools, Gear', bg: 'bg-purple-50', iconColor: 'text-purple-600' },
-          { title: 'Rides', icon: MapPin, color: 'orange', path: '/dashboard/rides', desc: 'Carpool to Campus', bg: 'bg-orange-50', iconColor: 'text-orange-600' },
-          { title: 'Skills', icon: Users, color: 'blue', path: '/dashboard/skills', desc: 'Tutoring, Design, Code', bg: 'bg-blue-50', iconColor: 'text-blue-600' },
-          { title: 'I Need', icon: Search, color: 'green', path: '/dashboard/requests', desc: 'Post a Request', bg: 'bg-green-50', iconColor: 'text-green-600' },
-        ].map((hub) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {hubs.map((hub) => (
           <a key={hub.title} href={hub.path} className="block">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer">
-              <div className={`w-11 h-11 ${hub.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+            <div className={`bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 ${hub.border} hover:shadow-md transition-all group cursor-pointer`}>
+              <div className={`w-10 h-10 sm:w-11 sm:h-11 ${hub.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                 <hub.icon className={`w-5 h-5 ${hub.iconColor}`} />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-0.5">{hub.title}</h3>
-              <p className="text-xs text-gray-500">{hub.desc}</p>
+              <p className="text-xs text-gray-500 hidden sm:block">{hub.desc}</p>
             </div>
           </a>
         ))}
@@ -91,118 +68,95 @@ export default async function DashboardHomePage() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Feed */}
+        {/* Empty feed */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-gray-500" />
-              Active on Campus
+            <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              Recent Listings
             </h2>
-            <a href="/dashboard/resources" className="text-sm text-gray-500 hover:text-black font-medium transition-colors">
-              View All →
+            <a href="/dashboard/resources" className="text-sm text-gray-500 hover:text-black font-medium transition-colors flex items-center gap-1">
+              Browse all <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
 
-          <div className="space-y-3">
-            {MOCK_LISTINGS.map((item) => (
-              <div key={item.title} className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer group">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                      <item.icon className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${BADGE_COLORS[item.badge] || 'bg-gray-100 text-gray-600'}`}>
-                          {item.type}
-                        </span>
-                        <span className="text-xs text-gray-400">{item.user}</span>
-                        <span className="text-xs text-gray-300">·</span>
-                        <span className="text-xs text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{item.time}</span>
-                      </div>
-                      <h4 className="font-medium text-gray-900 text-sm">{item.title}</h4>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm text-gray-900">{item.price}</p>
-                    <p className="text-xs text-gray-400">{item.status}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl border border-gray-100 p-10 flex flex-col items-center justify-center text-center">
+            <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
+              <Package className="w-7 h-7 text-gray-300" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-800 mb-1">No listings yet</h3>
+            <p className="text-xs text-gray-400 mb-5 max-w-xs">
+              Be the first to post — share a resource, offer a skill, or list a ride for your campus mates.
+            </p>
+            <a href="/dashboard/resources/create">
+              <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+                <Plus className="w-4 h-4" />
+                Post First Listing
+              </button>
+            </a>
           </div>
-
-          <a href="/dashboard/resources" className="block w-full text-center py-3 text-sm text-gray-500 hover:text-black font-medium border border-dashed border-gray-200 rounded-2xl hover:border-gray-300 transition-all">
-            See all listings on campus →
-          </a>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Reputation Card */}
+          {/* User card */}
           <div className="bg-black text-white rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-base font-bold">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-base font-bold flex-shrink-0">
                 {initials}
               </div>
-              <div>
-                <p className="font-semibold">{firstName}</p>
-                <p className="text-xs text-gray-400">{user?.email}</p>
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{firstName}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="text-2xl font-bold">4.9</span>
-              <span className="text-sm text-gray-400">/5.0</span>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="bg-white/5 rounded-xl p-3 text-center">
+                <p className="text-xl font-bold">0</p>
+                <p className="text-xs text-gray-400 mt-0.5">Exchanges</p>
+              </div>
+              <div className="bg-white/5 rounded-xl p-3 text-center">
+                <p className="text-xl font-bold">0</p>
+                <p className="text-xs text-gray-400 mt-0.5">Listings</p>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 mb-4">0 exchanges completed</p>
             <a href="/dashboard/profile" className="block w-full text-center py-2.5 bg-white text-black text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors">
               View Profile
             </a>
           </div>
 
-          {/* Recent Activity */}
+          {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {[
-                { msg: 'Ananya accepted your ride request', time: '2m ago', color: 'bg-green-500' },
-                { msg: 'New resource matching "ESP32"', time: '1h ago', color: 'bg-purple-500' },
-                { msg: 'Rahul reviewed your skill exchange', time: '3h ago', color: 'bg-blue-500' },
-              ].map((alert, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${alert.color}`} />
-                  <div>
-                    <p className="text-xs text-gray-700 leading-relaxed">{alert.msg}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{alert.time}</p>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
+            <div className="space-y-1">
+              {quickActions.map((action) => (
+                <a key={action.label} href={action.href} className={`flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group`}>
+                  <div className={`w-8 h-8 ${action.bg} rounded-lg flex items-center justify-center ${action.hoverBg} transition-colors`}>
+                    <action.icon className={`w-4 h-4 ${action.iconColor}`} />
                   </div>
-                </div>
+                  <span className="text-sm text-gray-700 font-medium">{action.label}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" />
+                </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Post */}
+          {/* Get started guide */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <a href="/dashboard/resources/create" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                  <Plus className="w-4 h-4 text-purple-600" />
-                </div>
-                <span className="text-sm text-gray-700 font-medium">Post a Resource</span>
-              </a>
-              <a href="/dashboard/rides/create" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group">
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                  <Plus className="w-4 h-4 text-orange-600" />
-                </div>
-                <span className="text-sm text-gray-700 font-medium">Offer a Ride</span>
-              </a>
-              <a href="/dashboard/skills/my-skills" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                  <Plus className="w-4 h-4 text-blue-600" />
-                </div>
-                <span className="text-sm text-gray-700 font-medium">Add a Skill</span>
-              </a>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Getting Started</h3>
+            <div className="space-y-3">
+              {[
+                { step: '1', text: 'Complete your profile', href: '/dashboard/profile/settings' },
+                { step: '2', text: 'Post your first resource', href: '/dashboard/resources/create' },
+                { step: '3', text: 'Browse what\'s on campus', href: '/dashboard/resources' },
+              ].map((item) => (
+                <a key={item.step} href={item.href} className="flex items-center gap-3 group">
+                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0 group-hover:bg-black group-hover:text-white transition-colors">
+                    {item.step}
+                  </div>
+                  <span className="text-xs text-gray-600 group-hover:text-black transition-colors">{item.text}</span>
+                </a>
+              ))}
             </div>
           </div>
         </div>

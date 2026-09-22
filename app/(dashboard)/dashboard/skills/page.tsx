@@ -1,31 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Star, Users, Code, Paintbrush, Music, Calculator } from 'lucide-react';
+import { Plus, Search, Users, Lightbulb } from 'lucide-react';
 
-const SKILLS = [
-  { id: 1, title: 'React & Next.js Tutoring', category: 'Coding', icon: Code, type: 'Exchange', user: 'Joel P.', dept: 'CS 4th Year', rating: 4.9, sessions: 12, badge: 'blue' },
-  { id: 2, title: 'UI/UX Design Mentoring', category: 'Design', icon: Paintbrush, type: 'Free', user: 'Ananya M.', dept: 'Design 3rd Year', rating: 5.0, sessions: 7, badge: 'purple' },
-  { id: 3, title: 'Guitar Lessons (Beginner)', category: 'Music', icon: Music, type: '₹200/hr', user: 'Kiran T.', dept: 'ECE 2nd Year', rating: 4.8, sessions: 20, badge: 'orange' },
-  { id: 4, title: 'Advanced Mathematics Coaching', category: 'Academic', icon: Calculator, type: 'Exchange', user: 'Priya R.', dept: 'Maths 4th Year', rating: 4.7, sessions: 35, badge: 'green' },
-  { id: 5, title: 'Python & Data Science', category: 'Coding', icon: Code, type: '₹150/hr', user: 'Rahul K.', dept: 'CS 3rd Year', rating: 4.9, sessions: 18, badge: 'blue' },
-  { id: 6, title: 'Public Speaking & Debate', category: 'Soft Skills', icon: Users, type: 'Free', user: 'Divya N.', dept: 'English 3rd Year', rating: 4.6, sessions: 9, badge: 'red' },
-];
-
-const BADGE_BG: Record<string, string> = {
-  blue: 'bg-blue-100 text-blue-700',
-  purple: 'bg-purple-100 text-purple-700',
-  orange: 'bg-orange-100 text-orange-700',
-  green: 'bg-green-100 text-green-700',
-  red: 'bg-red-100 text-red-700',
-};
+const CATEGORIES = ['All', 'Coding', 'Design', 'Music', 'Academic', 'Soft Skills', 'Other'];
 
 export default function SkillsPage() {
   const [search, setSearch] = useState('');
-  const filtered = SKILLS.filter(s =>
-    s.title.toLowerCase().includes(search.toLowerCase()) ||
-    s.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const [activeCategory, setActiveCategory] = useState('All');
 
   return (
     <div className="space-y-6">
@@ -42,6 +24,7 @@ export default function SkillsPage() {
         </a>
       </div>
 
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
@@ -53,34 +36,36 @@ export default function SkillsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(skill => (
-          <div key={skill.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer group">
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                <skill.icon className="w-5 h-5 text-gray-600" />
-              </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${BADGE_BG[skill.badge]}`}>
-                {skill.category}
-              </span>
-            </div>
-            <h3 className="font-semibold text-gray-900 text-sm mb-1">{skill.title}</h3>
-            <p className="text-xs text-gray-500 mb-3">{skill.user} · {skill.dept}</p>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-bold text-gray-900 text-sm">{skill.type}</p>
-                <p className="text-xs text-gray-400">{skill.sessions} sessions done</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                <span className="text-xs font-medium text-gray-700">{skill.rating}</span>
-              </div>
-            </div>
-            <button className="w-full mt-3 py-2 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors">
-              Request Session
-            </button>
-          </div>
+      {/* Category filters */}
+      <div className="flex flex-wrap gap-2">
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              activeCategory === cat ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {cat}
+          </button>
         ))}
+      </div>
+
+      {/* Empty State */}
+      <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center">
+        <div className="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mb-5">
+          <Lightbulb className="w-8 h-8 text-sky-300" />
+        </div>
+        <h3 className="text-base font-semibold text-gray-800 mb-2">No skills listed yet</h3>
+        <p className="text-sm text-gray-400 mb-6 max-w-sm">
+          Share what you know — coding, design, music, or anything else. Help your campus mates grow.
+        </p>
+        <a href="/dashboard/skills/my-skills">
+          <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <Plus className="w-4 h-4" />
+            Add Your First Skill
+          </button>
+        </a>
       </div>
     </div>
   );

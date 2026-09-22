@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User } from 'lucide-react';
+
+const NAV_LINKS = [
+  { href: '/dashboard/resources', label: 'Resources', icon: BookOpen },
+  { href: '/dashboard/requests', label: 'I Need', icon: HelpCircle },
+  { href: '/dashboard/rides', label: 'Rides', icon: Car },
+  { href: '/dashboard/skills', label: 'Skills', icon: Users },
+  { href: '/dashboard/chat', label: 'Chat', icon: MessageSquare },
+  { href: '/dashboard/profile', label: 'My Profile', icon: User },
+];
 
 export function MobileMenuWrapper() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,23 +18,46 @@ export function MobileMenuWrapper() {
   return (
     <>
       <button
-        className="md:hidden p-2 text-gray-600"
+        className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle menu"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-40 bg-white pt-16 md:hidden animate-fade-in-overlay">
-          <div className="flex flex-col p-6 gap-6">
-            <a href="/dashboard/resources" className="text-lg font-medium py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>Resources</a>
-            <a href="/dashboard/requests" className="text-lg font-medium py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>I Need</a>
-            <a href="/dashboard/rides" className="text-lg font-medium py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>Rides</a>
-            <a href="/dashboard/skills" className="text-lg font-medium py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>Skills</a>
-            <a href="/dashboard/profile" className="text-lg font-medium py-2" onClick={() => setIsOpen(false)}>My Profile</a>
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden animate-fade-in-overlay"
+            onClick={() => setIsOpen(false)}
+          />
+          {/* Drawer */}
+          <div className="fixed top-0 right-0 z-50 h-full w-72 bg-white shadow-xl md:hidden animate-slide-in-right flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <span className="font-bold text-gray-900">Menu</span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+              {NAV_LINKS.map(({ href, label, icon: Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-black transition-colors font-medium"
+                >
+                  <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  {label}
+                </a>
+              ))}
+            </nav>
           </div>
-        </div>
+        </>
       )}
     </>
   );
