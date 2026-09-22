@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Plus, Search, MapPin, Clock, Users, ArrowRight, Car } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import type { Ride } from '@/lib/database.types';
@@ -8,7 +9,7 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
   const isOwner = !!currentUserId && ride.creator_id === currentUserId;
 
   return (
-    <a
+    <Link
       href={`/dashboard/rides/${ride.id}`}
       className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-sm transition-all block group"
     >
@@ -93,7 +94,7 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -104,7 +105,18 @@ export default async function RidesBrowsePage() {
   const { data: rides, error } = await supabase
     .from('rides')
     .select(`
-      *,
+      id,
+      from_location,
+      to_location,
+      ride_date,
+      ride_time,
+      vehicle_type,
+      available_seats,
+      total_seats,
+      estimated_cost,
+      notes,
+      status,
+      creator_id,
       creator:profiles!creator_id(id, full_name, department, year, is_verified, rating, avatar_url)
     `)
     .eq('status', 'active')
@@ -117,7 +129,7 @@ export default async function RidesBrowsePage() {
     console.error('[RidesPage] Failed to load rides:', error);
   }
 
-  const items = (rides ?? []) as Ride[];
+  const items = (rides ?? []) as unknown as Ride[];
 
   return (
     <div className="space-y-6">
@@ -127,12 +139,10 @@ export default async function RidesBrowsePage() {
           <h1 className="text-2xl font-bold text-gray-900">Campus Rides</h1>
           <p className="text-sm text-gray-500 mt-0.5">Find or offer rides to and from campus</p>
         </div>
-        <a href="/dashboard/rides/create">
-          <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-            <Plus className="w-4 h-4" />
-            Offer a Ride
-          </button>
-        </a>
+        <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Plus className="w-4 h-4" />
+          Offer a Ride
+        </Link>
       </div>
 
       {/* Search */}
@@ -185,12 +195,10 @@ export default async function RidesBrowsePage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Going somewhere? Post a ride and split fuel costs with verified campus mates.
           </p>
-          <a href="/dashboard/rides/create">
-            <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-              <Plus className="w-4 h-4" />
-              Offer a Ride
-            </button>
-          </a>
+          <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <Plus className="w-4 h-4" />
+            Offer a Ride
+          </Link>
         </div>
       ) : null}
     </div>

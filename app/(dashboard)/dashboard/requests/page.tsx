@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Plus, Search, HelpCircle, Clock, AlertCircle } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import type { Need } from '@/lib/database.types';
@@ -28,7 +29,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
     new Date(need.deadline) < new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
   return (
-    <a
+    <Link
       href={`/dashboard/requests/${need.id}`}
       className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer block group"
     >
@@ -91,7 +92,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
           {isOwner ? 'Your Request' : 'View & Help'}
         </span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -104,7 +105,16 @@ export default async function RequestsPage() {
   const { data: needs, error } = await supabase
     .from('needs')
     .select(`
-      *,
+      id,
+      title,
+      description,
+      budget_min,
+      budget_max,
+      deadline,
+      duration,
+      status,
+      created_at,
+      poster_id,
       poster:profiles!poster_id(id, full_name, department, year, is_verified, rating),
       category:categories(id, name, slug)
     `)
@@ -116,7 +126,7 @@ export default async function RequestsPage() {
     console.error('[RequestsPage] Failed to load needs:', error);
   }
 
-  const items = (needs ?? []) as Need[];
+  const items = (needs ?? []) as unknown as Need[];
 
   return (
     <div className="space-y-6">
@@ -125,12 +135,10 @@ export default async function RequestsPage() {
           <h1 className="text-2xl font-bold text-gray-900">I Need…</h1>
           <p className="text-gray-500 text-sm mt-0.5">Help a fellow student find what they need</p>
         </div>
-        <a href="/dashboard/requests/create">
-          <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-            <Plus className="w-4 h-4" />
-            Post a Need
-          </button>
-        </a>
+        <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Plus className="w-4 h-4" />
+          Post a Need
+        </Link>
       </div>
 
       <div className="relative">
@@ -173,12 +181,10 @@ export default async function RequestsPage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Need something from campus? Post a request — your peers can help.
           </p>
-          <a href="/dashboard/requests/create">
-            <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-              <Plus className="w-4 h-4" />
-              Post a Need
-            </button>
-          </a>
+          <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <Plus className="w-4 h-4" />
+            Post a Need
+          </Link>
         </div>
       ) : null}
     </div>

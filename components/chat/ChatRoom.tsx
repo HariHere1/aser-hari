@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { ArrowLeft, Send, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
 
@@ -198,9 +199,9 @@ export function ChatRoom({
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* WHO Header */}
       <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-        <a href="/dashboard/chat" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all flex-shrink-0">
+        <Link href="/dashboard/chat" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all flex-shrink-0">
           <ArrowLeft className="w-4 h-4" />
-        </a>
+        </Link>
         {otherProfile && <Avatar name={otherName} url={otherProfile.avatar_url} size={10} />}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
@@ -231,12 +232,12 @@ export function ChatRoom({
               </p>
             </div>
           </div>
-          <a
+          <Link
             href={`/dashboard/resources/${conversation.resource.id}`}
             className="flex-shrink-0 px-3 py-1.5 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-semibold transition-all"
           >
             View Resource
-          </a>
+          </Link>
         </div>
       )}
 
@@ -251,12 +252,12 @@ export function ChatRoom({
               </p>
             </div>
           </div>
-          <a
+          <Link
             href={`/dashboard/requests/${conversation.need.id}`}
             className="flex-shrink-0 px-3 py-1.5 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-semibold transition-all"
           >
             View Request
-          </a>
+          </Link>
         </div>
       )}
 
@@ -273,12 +274,12 @@ export function ChatRoom({
               </p>
             </div>
           </div>
-          <a
+          <Link
             href={`/dashboard/rides/${conversation.ride.id}`}
             className="flex-shrink-0 px-3 py-1.5 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-semibold transition-all"
           >
             View Ride
-          </a>
+          </Link>
         </div>
       )}
 
@@ -293,12 +294,12 @@ export function ChatRoom({
               </p>
             </div>
           </div>
-          <a
+          <Link
             href={`/dashboard/skills/${conversation.skill.id}`}
             className="flex-shrink-0 px-3 py-1.5 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-semibold transition-all"
           >
             View Skill
-          </a>
+          </Link>
         </div>
       )}
 

@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Car, Star, ShieldCheck, MessageSquare } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
@@ -37,13 +39,13 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <a
+        <Link
           href="/dashboard/rides"
           className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all flex items-center gap-2 text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Rides</span>
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -135,7 +137,9 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   {creator.avatar_url ? (
-                    <img src={creator.avatar_url} alt={creator.full_name} className="w-12 h-12 rounded-full object-cover" />
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                      <Image src={creator.avatar_url} alt={creator.full_name} fill sizes="48px" className="object-cover" />
+                    </div>
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base">
                       {creator.full_name?.[0]?.toUpperCase() ?? 'U'}

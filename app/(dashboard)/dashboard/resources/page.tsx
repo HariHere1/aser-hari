@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Plus, Search, Filter, Package, MapPin, Clock, Star } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import type { Resource } from '@/lib/database.types';
@@ -18,7 +20,7 @@ function ResourceCard({ resource, currentUserId }: { resource: Resource; current
   const methodColor = METHOD_COLORS[resource.method ?? ''] ?? 'bg-gray-100 text-gray-700';
 
   return (
-    <a
+    <Link
       href={`/dashboard/resources/${resource.id}`}
       className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
     >
@@ -26,16 +28,18 @@ function ResourceCard({ resource, currentUserId }: { resource: Resource; current
         {/* Image */}
         <div className="h-44 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative overflow-hidden">
           {img ? (
-            <img
+            <Image
               src={img}
               alt={resource.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
             <Package className="w-12 h-12 text-gray-200 group-hover:text-gray-300 transition-colors" />
           )}
           {isOwner && (
-            <span className="absolute top-3 left-3 text-xs font-semibold px-2.5 py-0.5 bg-black/80 text-white rounded-full backdrop-blur-sm">
+            <span className="absolute top-3 left-3 z-10 text-xs font-semibold px-2.5 py-0.5 bg-black/80 text-white rounded-full backdrop-blur-sm">
               Your Listing
             </span>
           )}
@@ -101,7 +105,7 @@ function ResourceCard({ resource, currentUserId }: { resource: Resource; current
           {isOwner ? 'Your Listing' : 'View & Request'}
         </span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -115,7 +119,16 @@ export default async function ResourcesBrowsePage() {
   const { data: resources, error } = await supabase
     .from('resources')
     .select(`
-      *,
+      id,
+      title,
+      method,
+      price,
+      price_unit,
+      condition,
+      location,
+      image_urls,
+      created_at,
+      owner_id,
       owner:profiles!owner_id(id, full_name, department, year, is_verified, rating, avatar_url),
       category:categories(id, name, slug)
     `)
@@ -127,7 +140,7 @@ export default async function ResourcesBrowsePage() {
     console.error('[ResourcesPage] Failed to load resources:', error);
   }
 
-  const items = (resources ?? []) as Resource[];
+  const items = (resources ?? []) as unknown as Resource[];
 
   return (
     <div className="space-y-6">
@@ -138,17 +151,13 @@ export default async function ResourcesBrowsePage() {
           <p className="text-gray-500 text-sm mt-0.5">Browse items available to borrow, buy, or rent</p>
         </div>
         <div className="flex gap-3 flex-wrap">
-          <a href="/dashboard/resources/manage">
-            <button className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-              My Listings
-            </button>
-          </a>
-          <a href="/dashboard/resources/create">
-            <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-              <Plus className="w-4 h-4" />
-              Post Resource
-            </button>
-          </a>
+          <Link href="/dashboard/resources/manage" className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            My Listings
+          </Link>
+          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <Plus className="w-4 h-4" />
+            Post Resource
+          </Link>
         </div>
       </div>
 
@@ -205,12 +214,10 @@ export default async function ResourcesBrowsePage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Your campus resource board is empty. Post the first item — a book, component, tool, or anything you can share.
           </p>
-          <a href="/dashboard/resources/create">
-            <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
-              <Plus className="w-4 h-4" />
-              Post a Resource
-            </button>
-          </a>
+          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+            <Plus className="w-4 h-4" />
+            Post a Resource
+          </Link>
         </div>
       ) : null}
     </div>

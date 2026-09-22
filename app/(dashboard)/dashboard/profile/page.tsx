@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { createClientServer } from '@/lib/supabase-server';
 import { Package, Car, Lightbulb, Settings, Edit3, ShieldCheck, Star, HelpCircle } from 'lucide-react';
 import type { Profile } from '@/lib/database.types';
@@ -9,31 +11,26 @@ export default async function ProfilePage() {
 
   if (!user) return null;
 
-  // 1. Fetch real profile from profiles table
-  const { data: profileData, error: profileErr } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  // Fetch profile and all 4 domain counts in parallel
+  const [
+    { data: profileData, error: profileErr },
+    { count: resourceCount },
+    { count: needCount },
+    { count: rideCount },
+    { count: skillCount },
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('resources').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+    supabase.from('needs').select('id', { count: 'exact', head: true }).eq('poster_id', user.id),
+    supabase.from('rides').select('id', { count: 'exact', head: true }).eq('creator_id', user.id),
+    supabase.from('skills').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+  ]);
 
   if (profileErr) {
     console.error('[ProfilePage] Error fetching profile:', profileErr);
   }
 
   const profile = profileData as Profile | null;
-
-  // 2. Fetch real counts across all 4 domains for current user
-  const [
-    { count: resourceCount },
-    { count: needCount },
-    { count: rideCount },
-    { count: skillCount },
-  ] = await Promise.all([
-    supabase.from('resources').select('*', { count: 'exact', head: true }).eq('owner_id', user.id),
-    supabase.from('needs').select('*', { count: 'exact', head: true }).eq('poster_id', user.id),
-    supabase.from('rides').select('*', { count: 'exact', head: true }).eq('creator_id', user.id),
-    supabase.from('skills').select('*', { count: 'exact', head: true }).eq('owner_id', user.id),
-  ]);
 
   const fullName = profile?.full_name ?? user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Student';
   const initials = fullName
@@ -49,11 +46,15 @@ export default async function ProfilePage() {
       <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={fullName}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
-            />
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0">
+              <Image
+                src={profile.avatar_url}
+                alt={fullName}
+                fill
+                sizes="(max-width: 640px) 80px, 96px"
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-black text-white flex items-center justify-center text-2xl sm:text-3xl font-bold flex-shrink-0">
               {initials}
@@ -90,12 +91,12 @@ export default async function ProfilePage() {
                 <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
               </div>
 
-              <a href="/dashboard/profile/settings" className="flex-shrink-0">
+              <Link href="/dashboard/profile/settings" className="flex-shrink-0">
                 <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                   <Settings className="w-4 h-4" />
                   Edit Profile
                 </button>
-              </a>
+              </Link>
             </div>
 
             {/* Rating */}
@@ -138,7 +139,7 @@ export default async function ProfilePage() {
           { label: 'My Rides', count: rideCount, icon: Car, href: '/dashboard/rides', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
           { label: 'My Skills', count: skillCount, icon: Lightbulb, href: '/dashboard/skills/my-skills', bg: 'bg-sky-50', iconColor: 'text-sky-600' },
         ].map(item => (
-          <a key={item.label} href={item.href} className="block">
+          <Link key={item.label} href={item.href} className="block">
             <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center hover:border-gray-300 hover:shadow-sm transition-all group cursor-pointer">
               <div className={`w-10 h-10 ${item.bg} rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                 <item.icon className={`w-4 h-4 ${item.iconColor}`} />
@@ -146,7 +147,7 @@ export default async function ProfilePage() {
               <p className="text-sm font-semibold text-gray-900">{item.label}</p>
               <p className="text-xs text-gray-400 mt-0.5">{item.count ?? 0} active</p>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
 
@@ -154,19 +155,19 @@ export default async function ProfilePage() {
       <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-gray-900 text-base">About</h2>
-          <a href="/dashboard/profile/settings" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors font-medium">
+          <Link href="/dashboard/profile/settings" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors font-medium">
             <Edit3 className="w-3.5 h-3.5" />
             Edit Bio
-          </a>
+          </Link>
         </div>
         {profile?.bio ? (
           <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{profile.bio}</p>
         ) : (
           <p className="text-sm text-gray-400 italic">
             No bio yet.{' '}
-            <a href="/dashboard/profile/settings" className="underline underline-offset-2 hover:text-black transition-colors">
+            <Link href="/dashboard/profile/settings" className="underline underline-offset-2 hover:text-black transition-colors">
               Add one
-            </a>{' '}
+            </Link>{' '}
             to let fellow students know about you and your academic interests.
           </p>
         )}

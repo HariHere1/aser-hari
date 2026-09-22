@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Bell, Network, MessageSquare, User, LogOut } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { signOut } from '@/app/actions/auth';
@@ -22,20 +23,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <a href="/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <Network className="w-4 h-4" />
               <span className="text-base font-bold tracking-tight">CampusNet</span>
-            </a>
+            </Link>
 
             <div className="hidden md:flex items-center gap-1">
-              <a href="/dashboard/resources" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Resources</a>
-              <a href="/dashboard/requests" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">I Need</a>
-              <a href="/dashboard/rides" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Rides</a>
-              <a href="/dashboard/skills" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Skills</a>
-              <a href="/dashboard/chat" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all flex items-center gap-1.5">
+              <Link href="/dashboard/resources" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Resources</Link>
+              <Link href="/dashboard/requests" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">I Need</Link>
+              <Link href="/dashboard/rides" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Rides</Link>
+              <Link href="/dashboard/skills" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Skills</Link>
+              <Link href="/dashboard/chat" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all flex items-center gap-1.5">
                 <MessageSquare className="w-3.5 h-3.5" />
                 Chat
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -45,13 +46,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
             </button>
 
-            <a
+            <Link
               href="/dashboard/profile"
               className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
               title="Profile"
             >
               <User className="w-5 h-5" />
-            </a>
+            </Link>
 
             {/* User avatar + sign out */}
             <div className="flex items-center gap-2">

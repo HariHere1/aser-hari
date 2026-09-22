@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useActionState, useState, useRef } from 'react';
+import Link from 'next/link';
 import { ArrowLeft, Upload, X, CheckCircle2, Loader2, Info, ChevronDown, AlertCircle } from 'lucide-react';
 import { createResource, ActionState } from '@/app/actions/listings';
 import { createClient } from '@/lib/supabase';
@@ -86,9 +87,9 @@ export default function CreateResourcePage({
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <a href="/dashboard/resources" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
+        <Link href="/dashboard/resources" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
           <ArrowLeft className="w-4 h-4" />
-        </a>
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Post a Resource</h1>
           <p className="text-sm text-gray-500 mt-0.5">Share something with your campus community</p>
@@ -288,9 +289,9 @@ export default function CreateResourcePage({
 
         {/* Submit */}
         <div className="flex gap-3">
-          <a href="/dashboard/resources" className="flex-1 py-3.5 text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+          <Link href="/dashboard/resources" className="flex-1 py-3.5 text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
             Cancel
-          </a>
+          </Link>
           <button
             type="submit"
             disabled={isPending || uploading || !method || !condition}

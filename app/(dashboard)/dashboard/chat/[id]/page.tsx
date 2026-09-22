@@ -18,18 +18,34 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
 
   if (!participant) return notFound();
 
-  // Load conversation info with linked context item
-  const { data: rawConversation } = await supabase
-    .from('conversations')
-    .select(`
-      id, type, resource_id, need_id, ride_id, skill_id,
-      resource:resources(id, title, price, price_unit, method, status, image_urls),
-      need:needs(id, title, budget_min, budget_max, status),
-      ride:rides(id, from_location, to_location, ride_date, ride_time, estimated_cost, status),
-      skill:skills(id, title, rate, rate_unit, level, is_active)
-    `)
-    .eq('id', id)
-    .single();
+  // Fetch conversation info, participants, and recent messages in parallel
+  const [
+    { data: rawConversation },
+    { data: participants },
+    { data: messages, error: msgError },
+  ] = await Promise.all([
+    supabase
+      .from('conversations')
+      .select(`
+        id, type, resource_id, need_id, ride_id, skill_id,
+        resource:resources(id, title, price, price_unit, method, status, image_urls),
+        need:needs(id, title, budget_min, budget_max, status),
+        ride:rides(id, from_location, to_location, ride_date, ride_time, estimated_cost, status),
+        skill:skills(id, title, rate, rate_unit, level, is_active)
+      `)
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('conversation_participants')
+      .select('profile_id, profile:profiles(id, full_name, department, year, is_verified, avatar_url)')
+      .eq('conversation_id', id),
+    supabase
+      .from('messages')
+      .select('id, body, image_url, created_at, sender_id, sender:profiles!sender_id(id, full_name, avatar_url)')
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ]);
 
   const conversation = rawConversation ? {
     ...rawConversation,
@@ -38,20 +54,6 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
     ride: Array.isArray(rawConversation.ride) ? rawConversation.ride[0] : rawConversation.ride,
     skill: Array.isArray(rawConversation.skill) ? rawConversation.skill[0] : rawConversation.skill,
   } : null;
-
-  // Load all participants with profiles
-  const { data: participants } = await supabase
-    .from('conversation_participants')
-    .select('profile_id, profile:profiles(id, full_name, department, year, is_verified, avatar_url)')
-    .eq('conversation_id', id);
-
-  // Load existing messages
-  const { data: messages, error: msgError } = await supabase
-    .from('messages')
-    .select('id, body, image_url, created_at, sender_id, sender:profiles!sender_id(id, full_name, avatar_url)')
-    .eq('conversation_id', id)
-    .order('created_at', { ascending: true })
-    .limit(100);
 
   if (msgError) console.error('[ChatRoom] messages error:', msgError);
 
@@ -62,8 +64,8 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
     ? otherParticipant.profile[0]
     : otherParticipant?.profile;
 
-  // Normalise messages — sender is returned as array by Supabase
-  const normMessages = (messages ?? []).map((m: any) => ({
+  // Normalise messages in chronological order for display
+  const normMessages = (messages ?? []).slice().reverse().map((m: any) => ({
     ...m,
     sender: Array.isArray(m.sender) ? m.sender[0] ?? null : m.sender ?? null,
   }));

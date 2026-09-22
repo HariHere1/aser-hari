@@ -28,24 +28,26 @@ export default async function ChatPage() {
   // Load last message + other participant for each conversation
   let conversations: any[] = [];
   if (convIds.length > 0) {
-    const { data: convData } = await supabase
-      .from('conversations')
-      .select(`
-        id, type, resource_id, need_id, ride_id, skill_id, last_message_at,
-        conversation_participants(
-          profile_id,
-          profile:profiles(id, full_name, department, year, is_verified, avatar_url)
-        )
-      `)
-      .in('id', convIds)
-      .order('last_message_at', { ascending: false });
-
-    // For each conversation, get last message
-    const { data: lastMessages } = await supabase
-      .from('messages')
-      .select('conversation_id, body, created_at, sender_id')
-      .in('conversation_id', convIds)
-      .order('created_at', { ascending: false });
+    // Parallelize conversation details and bounded recent messages query
+    const [{ data: convData }, { data: lastMessages }] = await Promise.all([
+      supabase
+        .from('conversations')
+        .select(`
+          id, type, resource_id, need_id, ride_id, skill_id, last_message_at,
+          conversation_participants(
+            profile_id,
+            profile:profiles(id, full_name, department, year, is_verified, avatar_url)
+          )
+        `)
+        .in('id', convIds)
+        .order('last_message_at', { ascending: false }),
+      supabase
+        .from('messages')
+        .select('conversation_id, body, created_at, sender_id')
+        .in('conversation_id', convIds)
+        .order('created_at', { ascending: false })
+        .limit(Math.min(convIds.length * 3, 150)),
+    ]);
 
     const lastMsgMap: Record<string, any> = {};
     (lastMessages ?? []).forEach((m: any) => {

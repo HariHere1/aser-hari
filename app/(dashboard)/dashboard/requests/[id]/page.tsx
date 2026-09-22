@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, HelpCircle, MessageSquare, AlertCircle } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
@@ -47,13 +49,13 @@ export default async function NeedDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <a
+        <Link
           href="/dashboard/requests"
           className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all flex items-center gap-2 text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Requests</span>
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -61,11 +63,16 @@ export default async function NeedDetailPage({ params }: { params: Promise<{ id:
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
             {need.image_url ? (
-              <img
-                src={need.image_url}
-                alt={need.title}
-                className="w-full h-72 object-cover"
-              />
+              <div className="relative w-full h-72">
+                <Image
+                  src={need.image_url}
+                  alt={need.title}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                  className="object-cover"
+                />
+              </div>
             ) : null}
 
             <div className="p-6 space-y-4">
@@ -136,7 +143,9 @@ export default async function NeedDetailPage({ params }: { params: Promise<{ id:
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   {poster.avatar_url ? (
-                    <img src={poster.avatar_url} alt={poster.full_name} className="w-12 h-12 rounded-full object-cover" />
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                      <Image src={poster.avatar_url} alt={poster.full_name} fill sizes="48px" className="object-cover" />
+                    </div>
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base">
                       {poster.full_name?.[0]?.toUpperCase() ?? 'U'}

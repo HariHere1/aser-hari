@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Network } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { signOut } from '@/app/actions/auth';
@@ -31,12 +32,12 @@ export const HeroNav = async () => {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <a
+            <Link
               href="/dashboard"
               className="text-sm text-gray-700 hover:text-black transition-colors font-medium"
             >
               Dashboard
-            </a>
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
@@ -48,14 +49,15 @@ export const HeroNav = async () => {
           </>
         ) : (
           <>
-            <a href="/login" className="text-sm text-gray-700 hover:text-black transition-colors">
+            <Link href="/login" className="text-sm text-gray-700 hover:text-black transition-colors">
               Login
-            </a>
-            <a href="/signup">
-              <button className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
-                Join Campus
-              </button>
-            </a>
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+            >
+              Join Campus
+            </Link>
           </>
         )}
       </div>

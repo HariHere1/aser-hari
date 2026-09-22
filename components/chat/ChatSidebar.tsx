@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 
 export type Participant = {
@@ -78,7 +79,7 @@ export function ChatSidebar({
             conv.skill_id ? '💻 Skill' : null;
 
           return (
-            <a
+            <Link
               key={conv.id}
               href={`/dashboard/chat/${conv.id}`}
               className={`flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer ${
@@ -109,7 +110,7 @@ export function ChatSidebar({
                   <span className="mt-1 inline-block text-xs text-gray-400">{contextLabel}</span>
                 )}
               </div>
-            </a>
+            </Link>
           );
         })}
       </div>

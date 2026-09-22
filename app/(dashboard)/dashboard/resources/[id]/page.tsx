@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Clock, Star, ShieldCheck, Tag, AlertCircle, MessageSquare, Package } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
@@ -39,13 +41,13 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Top back nav */}
       <div className="flex items-center gap-4">
-        <a
+        <Link
           href="/dashboard/resources"
           className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all flex items-center gap-2 text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Resources</span>
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -55,20 +57,28 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
           <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
             {resource.image_urls && resource.image_urls.length > 0 ? (
               <div className="space-y-2">
-                <img
-                  src={resource.image_urls[0]}
-                  alt={resource.title}
-                  className="w-full h-80 object-cover"
-                />
+                <div className="relative w-full h-80">
+                  <Image
+                    src={resource.image_urls[0]}
+                    alt={resource.title}
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                    className="object-cover"
+                  />
+                </div>
                 {resource.image_urls.length > 1 && (
                   <div className="flex gap-2 p-3 overflow-x-auto">
                     {resource.image_urls.map((url: string, i: number) => (
-                      <img
-                        key={i}
-                        src={url}
-                        alt=""
-                        className="w-20 h-20 rounded-xl object-cover border border-gray-200 flex-shrink-0"
-                      />
+                      <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
+                        <Image
+                          src={url}
+                          alt=""
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -149,7 +159,9 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   {owner.avatar_url ? (
-                    <img src={owner.avatar_url} alt={owner.full_name} className="w-12 h-12 rounded-full object-cover" />
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                      <Image src={owner.avatar_url} alt={owner.full_name} fill sizes="48px" className="object-cover" />
+                    </div>
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base">
                       {owner.full_name?.[0]?.toUpperCase() ?? 'U'}

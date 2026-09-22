@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import { createNeed, ActionState } from '@/app/actions/listings';
 
@@ -26,9 +27,9 @@ export default function CreateNeedPage({
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <a href="/dashboard/requests" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
+        <Link href="/dashboard/requests" className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
           <ArrowLeft className="w-4 h-4" />
-        </a>
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Post a Need</h1>
           <p className="text-sm text-gray-500 mt-0.5">Tell the campus what you are looking for</p>
@@ -114,9 +115,9 @@ export default function CreateNeedPage({
         </div>
 
         <div className="flex gap-3">
-          <a href="/dashboard/requests" className="flex-1 py-3.5 text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+          <Link href="/dashboard/requests" className="flex-1 py-3.5 text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
             Cancel
-          </a>
+          </Link>
           <button type="submit" disabled={isPending}
             className="flex-1 py-3.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
             {isPending && <Loader2 className="w-4 h-4 animate-spin" />}

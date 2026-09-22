@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -45,7 +46,7 @@ export function MobileMenuWrapper() {
             </div>
             <nav className="flex-1 overflow-y-auto p-4 space-y-1">
               {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-                <a
+                <Link
                   key={href}
                   href={href}
                   onClick={() => setIsOpen(false)}
@@ -53,7 +54,7 @@ export function MobileMenuWrapper() {
                 >
                   <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   {label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
