@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Shield, ArrowLeft, Users, ShieldAlert, LogOut } from 'lucide-react';
+import { Shield, ArrowLeft, Users, ShieldAlert, LogOut, Network, CheckCircle2 } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { isAdmin } from '@/lib/admin';
 import { signOut } from '@/app/actions/auth';
@@ -19,60 +19,62 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Admin Bar */}
-      <header className="sticky top-0 z-50 bg-black text-white border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/admin/dashboard" className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-emerald-400" />
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* Top Header matching HeroNav design language */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/admin/dashboard" className="flex items-center gap-3 group">
+              <div className="w-9 h-9 rounded-2xl bg-black text-white flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm">
+                <Network className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-bold tracking-tight leading-none">CampusNet Admin</span>
-                <span className="text-[10px] text-gray-400 leading-none mt-1">Moderator Portal</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-gray-900 tracking-tight">CampusNet</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-full">
+                    Admin
+                  </span>
+                </div>
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1 pl-4 border-l border-gray-800">
+            <nav className="hidden md:flex items-center bg-gray-100/80 p-1 rounded-full border border-gray-200/50">
               <Link
                 href="/admin/dashboard"
-                className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all flex items-center gap-1.5"
+                className="px-4 py-1.5 text-xs font-semibold text-gray-700 hover:text-black rounded-full transition-all"
               >
-                <Users className="w-3.5 h-3.5" />
-                Moderation
+                Moderation & Directory
               </Link>
+              <div className="w-px h-3.5 bg-gray-300" />
               <Link
                 href="/admin/reports"
-                className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all flex items-center gap-1.5"
+                className="px-4 py-1.5 text-xs font-semibold text-gray-700 hover:text-black rounded-full transition-all"
               >
-                <ShieldAlert className="w-3.5 h-3.5" />
-                Reports
+                Safety & Reports
               </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="truncate max-w-[200px]">{user.email}</span>
+            <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-xs text-gray-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-medium truncate max-w-[180px]">{user.email}</span>
             </div>
 
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-all"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 hover:text-black px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-all"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>CampusNet</span>
+              <span>Back to Campus</span>
             </Link>
 
             <form action={signOut}>
               <button
                 type="submit"
-                className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
-                title="Sign Out"
+                className="bg-black text-white px-4 py-2 rounded-full text-xs font-medium hover:bg-gray-800 transition-colors shadow-2xs"
               >
-                <LogOut className="w-4 h-4" />
+                Sign Out
               </button>
             </form>
           </div>
@@ -80,7 +82,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-10">
         {children}
       </main>
     </div>

@@ -33,7 +33,7 @@ export default async function RideDetailPage({ params }: { params: Promise<{ id:
   const whatsAppUrl = hasWhatsApp && creator?.phone_number
     ? getWhatsAppUrl(
         creator.phone_number,
-        `Hi ${creator.full_name || 'there'}, I saw your ride offer on CampusNet: "${ride.origin} → ${ride.destination}". Are there seats available?`
+        `Hi ${creator.full_name || 'there'}, I saw your ride offer on CampusNet: "${ride.from_location} → ${ride.to_location}". Are there seats available?`
       )
     : null;
 

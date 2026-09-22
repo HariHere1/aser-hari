@@ -87,7 +87,7 @@ export default function SignUpPage() {
                 <Input
                   label="Full Name"
                   name="fullName"
-                  placeholder="John Doe"
+                  placeholder="e.g. Dennis Sabu"
                   defaultValue={fields.fullName}
                   required
                 />
@@ -95,7 +95,7 @@ export default function SignUpPage() {
                   label="College Email"
                   name="email"
                   type="email"
-                  placeholder="john.doe@college.edu"
+                  placeholder="student@college.edu"
                   defaultValue={fields.email}
                   required
                 />

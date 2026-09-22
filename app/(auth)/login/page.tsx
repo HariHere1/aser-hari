@@ -101,7 +101,7 @@ export default function LoginPage({
                 label="College Email"
                 name="email"
                 type="email"
-                placeholder="john.doe@college.edu"
+                placeholder="student@college.edu"
                 required
               />
               <Input

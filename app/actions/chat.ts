@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { createClientServer, createClientAdmin } from '@/lib/supabase-server';
 
 export async function startConversation({
@@ -94,9 +95,9 @@ export async function startConversation({
     }
 
     targetConvId = newConv.id;
-  } catch (err: any) {
+  } catch (err: unknown) {
     // If Next.js redirect was thrown, re-throw it so navigation occurs
-    if (err?.message === 'NEXT_REDIRECT') throw err;
+    if (isRedirectError(err)) throw err;
     console.error('[startConversation] Failed to provision conversation:', err);
     redirect('/dashboard/chat');
   }
