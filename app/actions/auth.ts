@@ -34,7 +34,7 @@ export async function signUp(prevState: { error: string | null }, formData: Form
         department,
         year,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aser-eosin.vercel.app'}/auth/callback`,
     },
   });
 
