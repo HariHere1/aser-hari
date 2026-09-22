@@ -1,14 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
-import { Bell, Network, MessageSquare, User, LogOut } from 'lucide-react';
+import { Bell, Network, MessageSquare, User, LogOut, Shield } from 'lucide-react';
 import { createClientServer } from '@/lib/supabase-server';
 import { signOut } from '@/app/actions/auth';
 import { MobileMenuWrapper } from '@/app/(dashboard)/MobileMenuWrapper';
+import { isAdmin } from '@/lib/admin';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const userIsAdmin = isAdmin(user);
   const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Student';
   const initials = displayName
     .split(' ')
@@ -41,6 +43,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
 
           <div className="flex items-center gap-3">
+            {userIsAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-black text-white text-xs font-semibold rounded-full hover:bg-gray-800 transition-colors shadow-sm"
+                title="Open Admin Portal"
+              >
+                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Admin</span>
+              </Link>
+            )}
+
             <button className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
@@ -75,7 +88,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
 
             {/* Mobile hamburger */}
-            <MobileMenuWrapper />
+            <MobileMenuWrapper isAdmin={userIsAdmin} />
           </div>
         </div>
       </nav>

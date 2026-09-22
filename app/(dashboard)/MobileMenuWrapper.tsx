@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User } from 'lucide-react';
+import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User, Shield } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/dashboard/resources', label: 'Resources', icon: BookOpen },
@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { href: '/dashboard/profile', label: 'My Profile', icon: User },
 ];
 
-export function MobileMenuWrapper() {
+export function MobileMenuWrapper({ isAdmin = false }: { isAdmin?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -56,6 +56,19 @@ export function MobileMenuWrapper() {
                   {label}
                 </Link>
               ))}
+
+              {isAdmin && (
+                <div className="pt-2 mt-2 border-t border-gray-100">
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black text-white hover:bg-gray-800 transition-colors font-semibold text-sm"
+                  >
+                    <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    Admin Portal
+                  </Link>
+                </div>
+              )}
             </nav>
           </div>
         </>
