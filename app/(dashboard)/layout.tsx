@@ -31,11 +31,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/dashboard/resources" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Resources</Link>
-              <Link href="/dashboard/requests" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">I Need</Link>
-              <Link href="/dashboard/rides" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Rides</Link>
-              <Link href="/dashboard/skills" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all">Skills</Link>
-              <Link href="/dashboard/chat" className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all flex items-center gap-1.5">
+              <Link href="/dashboard/resources" className="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all">Resources</Link>
+              <Link href="/dashboard/requests" className="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all">I Need</Link>
+              <Link href="/dashboard/rides" className="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all">Rides</Link>
+              <Link href="/dashboard/skills" className="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all">Skills</Link>
+              <Link href="/dashboard/chat" className="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all flex items-center gap-1.5">
                 <MessageSquare className="w-3.5 h-3.5" />
                 Chat
               </Link>
@@ -54,14 +54,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </Link>
             )}
 
-            <button className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all relative">
+            <button className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
             </button>
 
             <Link
               href="/dashboard/profile"
-              className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+              className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full transition-all"
               title="Profile"
             >
               <User className="w-5 h-5" />
@@ -79,7 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <button
                   type="submit"
                   title="Sign out"
-                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  className="hidden md:flex items-center gap-1.5 px-4 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

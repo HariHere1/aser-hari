@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
 
 export type Message = {
@@ -78,12 +78,14 @@ function timeLabel(dateStr: string) {
 export function ChatRoom({
   conversationId,
   currentUserId,
+  currentUserProfile,
   initialMessages,
   otherProfile,
   conversation,
 }: {
   conversationId: string;
   currentUserId: string;
+  currentUserProfile: { id: string; full_name: string; avatar_url: string | null } | null;
   initialMessages: Message[];
   otherProfile: Profile | null;
   conversation: Conversation;
@@ -167,7 +169,11 @@ export function ChatRoom({
       ...prev,
       {
         ...newMsg,
-        sender: { id: currentUserId, full_name: 'You', avatar_url: null },
+        sender: {
+          id: currentUserId,
+          full_name: currentUserProfile?.full_name ?? 'You',
+          avatar_url: currentUserProfile?.avatar_url ?? null,
+        },
       },
     ]);
 
@@ -217,6 +223,11 @@ export function ChatRoom({
               {otherProfile.department}{otherProfile.year ? ` • ${otherProfile.year}` : ''}
             </p>
           )}
+        </div>
+        {/* Private conversation badge */}
+        <div className="flex items-center gap-1 px-2.5 py-1 bg-gray-100 rounded-full flex-shrink-0" title="Only you and this person can see these messages">
+          <Lock className="w-3 h-3 text-gray-400" />
+          <span className="text-xs text-gray-400 font-medium">Private</span>
         </div>
       </div>
 

@@ -69,10 +69,10 @@ export default async function DashboardHomePage() {
   ]);
 
   const hubs = [
-    { title: 'Resources', icon: BookOpen, path: '/dashboard/resources', desc: 'Borrow, buy or rent', bg: 'bg-violet-50', iconColor: 'text-violet-600', border: 'hover:border-violet-200' },
-    { title: 'I Need', icon: HelpCircle, path: '/dashboard/requests', desc: 'Ask campus for help', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', border: 'hover:border-emerald-200' },
-    { title: 'Rides', icon: Car, path: '/dashboard/rides', desc: 'Carpool & split costs', bg: 'bg-amber-50', iconColor: 'text-amber-600', border: 'hover:border-amber-200' },
-    { title: 'Skills', icon: Users, path: '/dashboard/skills', desc: 'Tutoring & exchange', bg: 'bg-sky-50', iconColor: 'text-sky-600', border: 'hover:border-sky-200' },
+    { title: 'Resources', icon: BookOpen, path: '/dashboard/resources', desc: 'Borrow, buy or rent' },
+    { title: 'I Need', icon: HelpCircle, path: '/dashboard/requests', desc: 'Ask campus for help' },
+    { title: 'Rides', icon: Car, path: '/dashboard/rides', desc: 'Carpool & split costs' },
+    { title: 'Skills', icon: Users, path: '/dashboard/skills', desc: 'Tutoring & exchange' },
   ];
 
   const totalUserListings = (myResCount ?? 0) + (myNeedCount ?? 0) + (myRideCount ?? 0) + (mySkillCount ?? 0);
@@ -89,13 +89,13 @@ export default async function DashboardHomePage() {
         </div>
         <div className="flex gap-3 flex-wrap">
           <Link href="/dashboard/resources/create">
-            <button className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm">
+            <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm">
               <Plus className="w-4 h-4" />
               Post Resource
             </button>
           </Link>
           <Link href="/dashboard/requests/create">
-            <button className="flex items-center gap-2 bg-white text-black border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+            <button className="flex items-center gap-2 bg-white text-black border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
               <HelpCircle className="w-4 h-4" />
               Post Need
             </button>
@@ -107,9 +107,9 @@ export default async function DashboardHomePage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {hubs.map((hub) => (
           <Link key={hub.title} href={hub.path} className="block">
-            <div className={`bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 ${hub.border} hover:shadow-md transition-all group cursor-pointer`}>
-              <div className={`w-10 h-10 sm:w-11 sm:h-11 ${hub.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                <hub.icon className={`w-5 h-5 ${hub.iconColor}`} />
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gray-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-gray-200 transition-colors">
+                <hub.icon className="w-5 h-5 text-gray-600" />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-0.5">{hub.title}</h3>
               <p className="text-xs text-gray-500 hidden sm:block">{hub.desc}</p>
@@ -126,7 +126,7 @@ export default async function DashboardHomePage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Package className="w-4 h-4 text-violet-600" />
+                <Package className="w-4 h-4 text-gray-400" />
                 Recent Resources
               </h2>
               <Link href="/dashboard/resources" className="text-xs text-gray-500 hover:text-black font-semibold transition-colors flex items-center gap-1">
@@ -168,7 +168,7 @@ export default async function DashboardHomePage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-emerald-600" />
+                <HelpCircle className="w-4 h-4 text-gray-400" />
                 Recent Student Needs
               </h2>
               <Link href="/dashboard/requests" className="text-xs text-gray-500 hover:text-black font-semibold transition-colors flex items-center gap-1">
@@ -212,7 +212,7 @@ export default async function DashboardHomePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                  <Car className="w-4 h-4 text-amber-600" />
+                  <Car className="w-4 h-4 text-gray-400" />
                   Upcoming Rides
                 </h2>
                 <Link href="/dashboard/rides" className="text-xs text-gray-400 hover:text-black font-medium">More</Link>
@@ -246,7 +246,7 @@ export default async function DashboardHomePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                  <Lightbulb className="w-4 h-4 text-sky-600" />
+                  <Lightbulb className="w-4 h-4 text-gray-400" />
                   Featured Skills
                 </h2>
                 <Link href="/dashboard/skills" className="text-xs text-gray-400 hover:text-black font-medium">More</Link>
@@ -313,7 +313,7 @@ export default async function DashboardHomePage() {
 
             <Link
               href="/dashboard/profile"
-              className="w-full py-2.5 bg-white text-black hover:bg-gray-100 rounded-xl text-xs font-bold transition-colors block text-center"
+              className="w-full py-2.5 bg-white text-black hover:bg-gray-100 rounded-full text-xs font-bold transition-colors block text-center"
             >
               View Full Profile
             </Link>

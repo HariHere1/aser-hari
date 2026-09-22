@@ -19,7 +19,7 @@ export function MobileMenuWrapper({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <>
       <button
-        className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle menu"
       >
@@ -39,7 +39,7 @@ export function MobileMenuWrapper({ isAdmin = false }: { isAdmin?: boolean }) {
               <span className="font-bold text-gray-900">Menu</span>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -50,7 +50,7 @@ export function MobileMenuWrapper({ isAdmin = false }: { isAdmin?: boolean }) {
                   key={href}
                   href={href}
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-black transition-colors font-medium"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-700 hover:bg-gray-100 hover:text-black transition-colors font-medium"
                 >
                   <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   {label}

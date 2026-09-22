@@ -5,9 +5,9 @@ import { createClientServer } from '@/lib/supabase-server';
 import type { Need } from '@/lib/database.types';
 
 const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-emerald-100 text-emerald-700',
-  matched: 'bg-sky-100 text-sky-700',
-  closed: 'bg-gray-100 text-gray-500',
+  open:    'bg-gray-100 text-gray-700',
+  matched: 'bg-gray-800 text-white',
+  closed:  'bg-gray-100 text-gray-400',
 };
 
 function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string }) {
@@ -83,7 +83,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
           </div>
         </div>
         <span
-          className={`flex-shrink-0 px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
+          className={`flex-shrink-0 px-4 py-2 text-xs font-medium rounded-full transition-colors ${
             isOwner
               ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
               : 'bg-black text-white group-hover:bg-gray-800'
@@ -135,7 +135,7 @@ export default async function RequestsPage() {
           <h1 className="text-2xl font-bold text-gray-900">I Need…</h1>
           <p className="text-gray-500 text-sm mt-0.5">Help a fellow student find what they need</p>
         </div>
-        <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+        <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
           <Plus className="w-4 h-4" />
           Post a Need
         </Link>
@@ -152,10 +152,10 @@ export default async function RequestsPage() {
 
       <div className="flex flex-wrap gap-2">
         {CATEGORIES_FILTER.map(cat => (
-          <button key={cat} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${cat === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-            {cat}
-          </button>
-        ))}
+        <button key={cat} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${cat === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
+          {cat}
+        </button>
+      ))}
       </div>
 
       {error && (
@@ -181,7 +181,7 @@ export default async function RequestsPage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Need something from campus? Post a request — your peers can help.
           </p>
-          <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard/requests/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Plus className="w-4 h-4" />
             Post a Need
           </Link>

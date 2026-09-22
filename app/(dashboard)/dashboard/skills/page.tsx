@@ -5,9 +5,9 @@ import { createClientServer } from '@/lib/supabase-server';
 import type { Skill } from '@/lib/database.types';
 
 const LEVEL_COLORS: Record<string, string> = {
-  Beginner: 'bg-green-100 text-green-700',
-  Intermediate: 'bg-sky-100 text-sky-700',
-  Expert: 'bg-violet-100 text-violet-700',
+  Beginner:     'bg-gray-100 text-gray-600',
+  Intermediate: 'bg-gray-200 text-gray-700',
+  Expert:       'bg-gray-900 text-white',
 };
 
 function SkillCard({ skill, currentUserId }: { skill: Skill; currentUserId?: string }) {
@@ -80,7 +80,7 @@ function SkillCard({ skill, currentUserId }: { skill: Skill; currentUserId?: str
 
       <div className="mt-4 pt-0">
         <span
-          className={`block text-center w-full py-2 text-xs font-medium rounded-lg transition-colors ${
+          className={`block text-center w-full py-2 text-xs font-medium rounded-full transition-colors ${
             isOwner
               ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
               : 'bg-black text-white group-hover:bg-gray-800'
@@ -131,7 +131,7 @@ export default async function SkillsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Skills Exchange</h1>
           <p className="text-gray-500 text-sm mt-0.5">Learn from peers or share your expertise</p>
         </div>
-        <Link href="/dashboard/skills/my-skills" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+        <Link href="/dashboard/skills/my-skills" className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
           <Plus className="w-4 h-4" />
           Add a Skill
         </Link>
@@ -150,7 +150,7 @@ export default async function SkillsPage() {
       {/* Level filters */}
       <div className="flex flex-wrap gap-2">
         {LEVELS.map(l => (
-          <button key={l} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${l === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+          <button key={l} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${l === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
             {l}
           </button>
         ))}
@@ -175,7 +175,7 @@ export default async function SkillsPage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Share what you know — coding, design, music, or anything else.
           </p>
-          <Link href="/dashboard/skills/my-skills" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard/skills/my-skills" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Plus className="w-4 h-4" />
             Add Your First Skill
           </Link>

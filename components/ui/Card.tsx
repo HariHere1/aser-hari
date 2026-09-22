@@ -11,8 +11,8 @@ export const Card = ({
   ...rest
 }: CardProps) => {
   const variants = {
-    default: 'bg-white rounded-2xl border border-gray-100 shadow-2xl',
-    outline: 'bg-white rounded-2xl border border-gray-200 shadow-sm',
+    default: 'bg-white rounded-3xl border border-gray-100 shadow-2xl',
+    outline: 'bg-white rounded-3xl border border-gray-200 shadow-sm',
   };
 
   return (

@@ -47,7 +47,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-white px-6 py-12" style={{ backgroundImage: 'radial-gradient(circle, #e5e7eb 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       <div className="w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="text-center">
@@ -112,7 +112,7 @@ export default function SignUpPage() {
 
               <button
                 type="submit"
-                className="w-full py-4 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                className="w-full py-4 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
               >
                 Continue →
               </button>
@@ -178,7 +178,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full py-4 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Create Account

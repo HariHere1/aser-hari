@@ -84,7 +84,7 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
             <p className="text-xs text-gray-400">per person</p>
           </div>
           <span
-            className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-colors whitespace-nowrap ${
+            className={`px-5 py-2.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
               isOwner
                 ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
                 : 'bg-black text-white group-hover:bg-gray-800'
@@ -139,7 +139,7 @@ export default async function RidesBrowsePage() {
           <h1 className="text-2xl font-bold text-gray-900">Campus Rides</h1>
           <p className="text-sm text-gray-500 mt-0.5">Find or offer rides to and from campus</p>
         </div>
-        <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+        <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
           <Plus className="w-4 h-4" />
           Offer a Ride
         </Link>
@@ -156,7 +156,7 @@ export default async function RidesBrowsePage() {
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input type="text" placeholder="To..." className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all" />
           </div>
-          <button className="flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <button className="flex items-center justify-center gap-2 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Search className="w-4 h-4" />
             Search Rides
           </button>
@@ -166,7 +166,7 @@ export default async function RidesBrowsePage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
         {['All', 'Today', 'Tomorrow', 'This Week', '1 Seat', '2+ Seats'].map((f) => (
-          <button key={f} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${f === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+          <button key={f} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${f === 'All' ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
             {f}
           </button>
         ))}
@@ -195,7 +195,7 @@ export default async function RidesBrowsePage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Going somewhere? Post a ride and split fuel costs with verified campus mates.
           </p>
-          <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard/rides/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Plus className="w-4 h-4" />
             Offer a Ride
           </Link>

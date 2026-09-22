@@ -6,11 +6,11 @@ import { createClientServer } from '@/lib/supabase-server';
 import type { Resource } from '@/lib/database.types';
 
 const METHOD_COLORS: Record<string, string> = {
-  Sell: 'bg-violet-100 text-violet-700',
-  Rent: 'bg-amber-100 text-amber-700',
-  Borrow: 'bg-sky-100 text-sky-700',
-  Lend: 'bg-emerald-100 text-emerald-700',
-  Free: 'bg-green-100 text-green-700',
+  Sell:   'bg-gray-100 text-gray-700',
+  Rent:   'bg-gray-100 text-gray-700',
+  Borrow: 'bg-gray-100 text-gray-700',
+  Lend:   'bg-gray-100 text-gray-700',
+  Free:   'bg-gray-900 text-white',
 };
 
 function ResourceCard({ resource, currentUserId }: { resource: Resource; currentUserId?: string }) {
@@ -96,7 +96,7 @@ function ResourceCard({ resource, currentUserId }: { resource: Resource; current
 
       <div className="p-4 pt-0">
         <span
-          className={`block text-center w-full py-2 text-xs font-medium rounded-lg transition-colors ${
+          className={`block text-center w-full py-2 text-xs font-medium rounded-full transition-colors ${
             isOwner
               ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
               : 'bg-black text-white group-hover:bg-gray-800'
@@ -151,10 +151,10 @@ export default async function ResourcesBrowsePage() {
           <p className="text-gray-500 text-sm mt-0.5">Browse items available to borrow, buy, or rent</p>
         </div>
         <div className="flex gap-3 flex-wrap">
-          <Link href="/dashboard/resources/manage" className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+          <Link href="/dashboard/resources/manage" className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
             My Listings
           </Link>
-          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Plus className="w-4 h-4" />
             Post Resource
           </Link>
@@ -177,7 +177,7 @@ export default async function ResourcesBrowsePage() {
             <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Type</span>
           </div>
           {METHODS.map((m) => (
-            <span key={m} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${m === 'All' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600'}`}>
+            <span key={m} className={`px-4 py-1.5 rounded-full text-xs font-medium cursor-pointer ${m === 'All' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               {m}
             </span>
           ))}
@@ -214,7 +214,7 @@ export default async function ResourcesBrowsePage() {
           <p className="text-sm text-gray-400 mb-6 max-w-sm">
             Your campus resource board is empty. Post the first item — a book, component, tool, or anything you can share.
           </p>
-          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+          <Link href="/dashboard/resources/create" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
             <Plus className="w-4 h-4" />
             Post a Resource
           </Link>

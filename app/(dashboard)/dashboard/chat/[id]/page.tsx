@@ -8,21 +8,22 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return notFound();
 
-  // Verify user is a participant
+  // Verify user is a participant — non-participants get 404 (privacy enforcement)
   const { data: participant } = await supabase
     .from('conversation_participants')
     .select('profile_id')
     .eq('conversation_id', id)
-    .eq('profile_id', user.id)   // ← correct column: profile_id
+    .eq('profile_id', user.id)
     .single();
 
   if (!participant) return notFound();
 
-  // Fetch conversation info, participants, and recent messages in parallel
+  // Fetch conversation info, participants, messages and current user profile in parallel
   const [
     { data: rawConversation },
     { data: participants },
     { data: messages, error: msgError },
+    { data: currentUserProfile },
   ] = await Promise.all([
     supabase
       .from('conversations')
@@ -45,6 +46,12 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
       .eq('conversation_id', id)
       .order('created_at', { ascending: false })
       .limit(50),
+    // Fetch current user's real profile for display name
+    supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', user.id)
+      .single(),
   ]);
 
   const conversation = rawConversation ? {
@@ -81,6 +88,7 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
     <ChatRoom
       conversationId={id}
       currentUserId={user.id}
+      currentUserProfile={currentUserProfile ?? null}
       initialMessages={normMessages}
       otherProfile={otherProfileRaw ?? null}
       conversation={conversation}
