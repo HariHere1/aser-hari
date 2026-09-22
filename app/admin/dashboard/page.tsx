@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Users, ShieldAlert, CheckCircle2, XCircle, Search, Filter } from 'lucide-react';
+import { Users, ShieldAlert, CheckCircle2, XCircle, Search, Filter, Clock } from 'lucide-react';
+
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');

@@ -45,10 +45,10 @@ export default function HomePage() {
             className="animate-fade-in-up"
           >
             <Card className="p-6 h-full cursor-pointer hover:border-gray-300 transition-all group">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors [&>svg]:w-6 [&>svg]:h-6 ${
                 hub.color === 'purple' ? 'bg-purple-100 text-purple-600' : 'bg-orange-100 text-orange-600'
               }`}>
-                {React.cloneElement(hub.icon as React.ReactElement, { className: 'w-6 h-6' })}
+                {hub.icon}
               </div>
               <h3 className="text-lg font-semibold mb-1 group-hover:text-black transition-colors">{hub.title}</h3>
               <p className="text-sm text-gray-500 mb-4">{hub.desc}</p>
