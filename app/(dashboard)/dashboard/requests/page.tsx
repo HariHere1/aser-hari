@@ -31,15 +31,15 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
   return (
     <Link
       href={`/dashboard/requests/${need.id}`}
-      className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer block group"
+      className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer block group"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4 flex-1 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
           <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-gray-200 transition-colors">
             <HelpCircle className="w-5 h-5 text-gray-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor}`}>
                 {need.category?.name ?? 'General'}
               </span>
@@ -59,7 +59,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
             {need.description && (
               <p className="text-xs text-gray-400 line-clamp-2 mb-1">{need.description}</p>
             )}
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500">
               {poster && <span>{isOwner ? 'You (Requester)' : poster.full_name}</span>}
               {poster?.department && <span>· {poster.department}{poster.year ? ` ${poster.year}` : ''}</span>}
               <span className="flex items-center gap-1">
@@ -67,7 +67,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
                 {new Date(need.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-xs">
               {need.duration && (
                 <span className="text-gray-500">Duration: {need.duration}</span>
               )}
@@ -83,7 +83,7 @@ function NeedCard({ need, currentUserId }: { need: Need; currentUserId?: string 
           </div>
         </div>
         <span
-          className={`flex-shrink-0 px-4 py-2 text-xs font-medium rounded-full transition-colors ${
+          className={`flex-shrink-0 w-full sm:w-auto text-center px-4 py-2.5 text-xs font-medium rounded-full transition-colors ${
             isOwner
               ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
               : 'bg-black text-white group-hover:bg-gray-800'

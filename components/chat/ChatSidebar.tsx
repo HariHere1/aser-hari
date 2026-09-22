@@ -6,7 +6,7 @@ import { MessageSquare } from 'lucide-react';
 
 export type Participant = {
   profile_id: string;
-  profile: { id: string; full_name: string; department: string | null; year: string | null; is_verified: boolean; avatar_url: string | null } | null;
+  profile: { id: string; full_name: string; student_id?: string | null; department: string | null; year: string | null; is_verified: boolean; avatar_url: string | null } | null;
 };
 
 export type Conversation = {
@@ -60,12 +60,13 @@ export function ChatSidebar({
   }
 
   return (
-    <div className="flex-1 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="flex-1 bg-white rounded-2xl border border-gray-100 overflow-y-auto">
       <div className="divide-y divide-gray-50">
         {conversations.map((conv) => {
-          const other = conv.otherParticipants[0]?.profile;
-          const name = other?.full_name ?? 'Unknown User';
-          const sub = [other?.department, other?.year].filter(Boolean).join(' ');
+          const rawProfile = conv.otherParticipants[0]?.profile;
+          const other = Array.isArray(rawProfile) ? rawProfile[0] : rawProfile;
+          const name = other?.full_name?.trim() || other?.student_id || 'Campus Student';
+          const sub = [other?.department, other?.year].filter(Boolean).join(' · ');
 
           const isUnread =
             conv.lastMsg &&
@@ -82,12 +83,12 @@ export function ChatSidebar({
             <Link
               key={conv.id}
               href={`/dashboard/chat/${conv.id}`}
-              className={`flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-3.5 py-3.5 sm:px-5 sm:py-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                 isUnread ? 'bg-gray-50/70 font-semibold' : ''
               }`}
             >
-              <div className="relative">
-                <Avatar name={name} url={other?.avatar_url} />
+              <div className="relative flex-shrink-0">
+                <Avatar name={name} url={other?.avatar_url} size={10} />
                 {isUnread && (
                   <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-black rounded-full border-2 border-white" />
                 )}
@@ -96,18 +97,20 @@ export function ChatSidebar({
                 <div className="flex items-center justify-between mb-0.5">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="font-semibold text-gray-900 text-sm truncate">{name}</span>
-                    {other?.is_verified && <span className="text-emerald-500 text-xs">✓</span>}
+                    {other?.is_verified && <span className="text-emerald-500 text-xs flex-shrink-0">✓</span>}
                   </div>
                   {conv.last_message_at && (
-                    <span className="text-xs text-gray-400 flex-shrink-0 ml-2">{timeAgo(conv.last_message_at)}</span>
+                    <span className="text-[11px] sm:text-xs text-gray-400 flex-shrink-0 ml-2">
+                      {timeAgo(conv.last_message_at)}
+                    </span>
                   )}
                 </div>
-                {sub && <p className="text-xs text-gray-400 mb-1">{sub}</p>}
+                {sub && <p className="text-xs text-gray-400 mb-1 truncate">{sub}</p>}
                 <p className={`text-xs truncate ${isUnread ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
                   {conv.lastMsg?.body ?? 'Start the conversation...'}
                 </p>
                 {contextLabel && (
-                  <span className="mt-1 inline-block text-xs text-gray-400">{contextLabel}</span>
+                  <span className="mt-1 inline-block text-[11px] text-gray-400 font-medium">{contextLabel}</span>
                 )}
               </div>
             </Link>

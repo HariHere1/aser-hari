@@ -1,4 +1,4 @@
-import { createClientServer } from '@/lib/supabase-server';
+import { createClientServer, createClientAdmin } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import ChatRoom from '@/components/chat/ChatRoom';
 
@@ -18,6 +18,10 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
 
   if (!participant) return notFound();
 
+  // Admin client is used after privacy verification to bypass the RLS restriction
+  // that filters out the other participant's record from conversation_participants
+  const admin = createClientAdmin();
+
   // Fetch conversation info, participants, messages and current user profile in parallel
   const [
     { data: rawConversation },
@@ -25,7 +29,7 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
     { data: messages, error: msgError },
     { data: currentUserProfile },
   ] = await Promise.all([
-    supabase
+    admin
       .from('conversations')
       .select(`
         id, type, resource_id, need_id, ride_id, skill_id,
@@ -36,18 +40,18 @@ export default async function ChatRoomPage({ params }: { params: Promise<{ id: s
       `)
       .eq('id', id)
       .single(),
-    supabase
+    admin
       .from('conversation_participants')
-      .select('profile_id, profile:profiles(id, full_name, department, year, is_verified, avatar_url)')
+      .select('profile_id, profile:profiles(id, full_name, student_id, department, year, is_verified, avatar_url)')
       .eq('conversation_id', id),
-    supabase
+    admin
       .from('messages')
       .select('id, body, image_url, created_at, sender_id, sender:profiles!sender_id(id, full_name, avatar_url)')
       .eq('conversation_id', id)
       .order('created_at', { ascending: false })
       .limit(50),
     // Fetch current user's real profile for display name
-    supabase
+    admin
       .from('profiles')
       .select('id, full_name, avatar_url')
       .eq('id', user.id)

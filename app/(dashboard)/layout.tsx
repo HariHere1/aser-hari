@@ -23,10 +23,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <Network className="w-4 h-4" />
+              <Network className="w-4 h-4 text-black flex-shrink-0" />
               <span className="text-base font-bold tracking-tight">CampusNet</span>
             </Link>
 
@@ -42,7 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {userIsAdmin && (
               <Link
                 href="/admin/dashboard"
@@ -67,9 +67,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <User className="w-5 h-5" />
             </Link>
 
-            {/* User avatar + sign out */}
-            <div className="flex items-center gap-2">
-              <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
+            {/* User avatar + sign out (desktop) */}
+            <div className="hidden md:flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">
                   {initials}
                 </div>
@@ -79,7 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <button
                   type="submit"
                   title="Sign out"
-                  className="hidden md:flex items-center gap-1.5 px-4 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -88,12 +88,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
 
             {/* Mobile hamburger */}
-            <MobileMenuWrapper isAdmin={userIsAdmin} />
+            <MobileMenuWrapper
+              isAdmin={userIsAdmin}
+              userName={displayName}
+              userEmail={user?.email}
+              userInitials={initials}
+            />
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {children}
       </main>
     </div>

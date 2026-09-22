@@ -43,28 +43,28 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Profile Card */}
-      <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start gap-6">
+      <div className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-8 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
           {profile?.avatar_url ? (
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0">
+            <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0">
               <Image
                 src={profile.avatar_url}
                 alt={fullName}
                 fill
-                sizes="(max-width: 640px) 80px, 96px"
+                sizes="(max-width: 640px) 64px, 96px"
                 className="object-cover"
               />
             </div>
           ) : (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-black text-white flex items-center justify-center text-2xl sm:text-3xl font-bold flex-shrink-0">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-black text-white flex items-center justify-center text-xl sm:text-3xl font-bold flex-shrink-0">
               {initials}
             </div>
           )}
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{fullName}</h1>
                   {profile?.is_verified && (
                     <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs font-semibold">
@@ -88,11 +88,11 @@ export default async function ProfilePage() {
                   <p className="text-gray-400 text-xs mt-0.5">Student ID: {profile.student_id}</p>
                 )}
 
-                <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
+                <p className="text-gray-400 text-xs mt-0.5 truncate">{user.email}</p>
               </div>
 
-              <Link href="/dashboard/profile/settings" className="flex-shrink-0">
-                <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+              <Link href="/dashboard/profile/settings" className="w-full sm:w-auto flex-shrink-0">
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:px-3 sm:py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                   <Settings className="w-4 h-4" />
                   Edit Profile
                 </button>
@@ -109,22 +109,22 @@ export default async function ProfilePage() {
             ) : null}
 
             {/* Real Domain Activity Counts */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 mt-6 pt-6 border-t border-gray-100">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-4 mt-6 pt-6 border-t border-gray-100">
               <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{resourceCount ?? 0}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Resources</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{resourceCount ?? 0}</p>
+                <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">Resources</p>
               </div>
               <div className="text-center border-l border-gray-100">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{needCount ?? 0}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Needs</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{needCount ?? 0}</p>
+                <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">Needs</p>
               </div>
               <div className="text-center border-l border-gray-100">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{rideCount ?? 0}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Rides</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{rideCount ?? 0}</p>
+                <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">Rides</p>
               </div>
               <div className="text-center border-l border-gray-100">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{skillCount ?? 0}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Skills</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{skillCount ?? 0}</p>
+                <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">Skills</p>
               </div>
             </div>
           </div>

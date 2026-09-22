@@ -47,14 +47,14 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-6 py-12" style={{ backgroundImage: 'radial-gradient(circle, #e5e7eb 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 sm:px-6 py-8 sm:py-12" style={{ backgroundImage: 'radial-gradient(circle, #e5e7eb 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         {/* Logo */}
         <div className="text-center">
           <div style={{ opacity: 0, animationDelay: '0.1s' }} className="animate-fade-in-up">
-            <a href="/" className="inline-flex items-center gap-2 mb-6">
-              <Network className="w-5 h-5" />
-              <span className="text-lg font-semibold">Campus Resource Network</span>
+            <a href="/" className="inline-flex items-center gap-2 mb-4 sm:mb-6">
+              <Network className="w-5 h-5 text-black" />
+              <span className="text-base sm:text-lg font-semibold">Campus Resource Network</span>
             </a>
 
             {/* Step indicator */}
@@ -68,10 +68,10 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            <h1 className="text-4xl font-normal tracking-tight mb-2">
+            <h1 className="text-3xl sm:text-4xl font-normal tracking-tight mb-2">
               {step === 1 ? 'Join the Network' : 'Your Student Profile'}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm sm:text-base">
               {step === 1
                 ? 'Create your verified student account.'
                 : 'Help us verify your campus identity.'}
@@ -79,7 +79,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <Card className="p-8 shadow-2xl">
+        <Card className="p-5 sm:p-8 shadow-xl sm:shadow-2xl">
           {/* Step 1 — Account details */}
           {step === 1 && (
             <form onSubmit={handleStep1} className="space-y-6 animate-fade-in-up">

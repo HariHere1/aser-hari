@@ -11,20 +11,20 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
   return (
     <Link
       href={`/dashboard/rides/${ride.id}`}
-      className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-300 hover:shadow-sm transition-all block group"
+      className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 hover:border-gray-300 hover:shadow-sm transition-all block group"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Route */}
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-              <span className="font-semibold text-gray-900">{ride.from_location}</span>
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">{ride.from_location}</span>
             </div>
             <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-              <span className="font-semibold text-gray-900">{ride.to_location}</span>
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">{ride.to_location}</span>
             </div>
             {isOwner && (
               <span className="text-xs font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
@@ -33,7 +33,7 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               {new Date(ride.ride_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} at {ride.ride_time?.slice(0, 5)}
@@ -55,36 +55,36 @@ function RideCard({ ride, currentUserId }: { ride: Ride; currentUserId?: string 
               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
                 {creator.full_name[0]}
               </div>
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-gray-600 truncate">
                 {isOwner ? 'You (Driver)' : creator.full_name}
               </span>
               {creator.department && (
                 <>
                   <span className="text-xs text-gray-300">·</span>
-                  <span className="text-xs text-gray-400">{creator.department}{creator.year ? ` ${creator.year}` : ''}</span>
+                  <span className="text-xs text-gray-400 truncate">{creator.department}{creator.year ? ` ${creator.year}` : ''}</span>
                 </>
               )}
               {creator.is_verified && (
-                <span className="text-xs text-emerald-600 font-medium">✓ Verified</span>
+                <span className="text-xs text-emerald-600 font-medium flex-shrink-0">✓ Verified</span>
               )}
             </div>
           )}
 
           {ride.notes && (
-            <p className="text-xs text-gray-400 mt-1.5 italic">{ride.notes}</p>
+            <p className="text-xs text-gray-400 mt-1.5 italic line-clamp-2">{ride.notes}</p>
           )}
         </div>
 
         {/* Price + CTA */}
-        <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 flex-shrink-0">
-          <div className="text-right">
-            <p className="text-xl font-bold text-gray-900">
+        <div className="flex flex-row justify-between items-center sm:flex-col sm:items-end gap-3 sm:gap-2 pt-3 border-t border-gray-100 sm:border-0 sm:pt-0">
+          <div className="text-left sm:text-right">
+            <p className="text-lg sm:text-xl font-bold text-gray-900">
               {ride.estimated_cost ? `₹${ride.estimated_cost}` : 'Free'}
             </p>
-            <p className="text-xs text-gray-400">per person</p>
+            <p className="text-[11px] sm:text-xs text-gray-400">per person</p>
           </div>
           <span
-            className={`px-5 py-2.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
+            className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
               isOwner
                 ? 'bg-gray-100 text-gray-800 border border-gray-200 group-hover:bg-gray-200'
                 : 'bg-black text-white group-hover:bg-gray-800'

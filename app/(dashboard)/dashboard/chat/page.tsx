@@ -1,4 +1,4 @@
-import { createClientServer } from '@/lib/supabase-server';
+import { createClientServer, createClientAdmin } from '@/lib/supabase-server';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 
 export default async function ChatPage() {
@@ -28,20 +28,24 @@ export default async function ChatPage() {
   // Load last message + other participant for each conversation
   let conversations: any[] = [];
   if (convIds.length > 0) {
+    // Admin client is used specifically here to bypass the restrictive
+    // conversation_participants RLS policy that hides other participants' rows
+    const admin = createClientAdmin();
+
     // Parallelize conversation details and bounded recent messages query
     const [{ data: convData }, { data: lastMessages }] = await Promise.all([
-      supabase
+      admin
         .from('conversations')
         .select(`
           id, type, resource_id, need_id, ride_id, skill_id, last_message_at,
           conversation_participants(
             profile_id,
-            profile:profiles(id, full_name, department, year, is_verified, avatar_url)
+            profile:profiles(id, full_name, student_id, department, year, is_verified, avatar_url)
           )
         `)
         .in('id', convIds)
         .order('last_message_at', { ascending: false }),
-      supabase
+      admin
         .from('messages')
         .select('conversation_id, body, created_at, sender_id')
         .in('conversation_id', convIds)
@@ -63,18 +67,23 @@ export default async function ChatPage() {
       ...c,
       lastReadAt: lastReadMap[c.id] ?? null,
       lastMsg: lastMsgMap[c.id] ?? null,
-      otherParticipants: (c.conversation_participants ?? []).filter(
-        (p: any) => p.profile_id !== user.id
-      ),
+      otherParticipants: (c.conversation_participants ?? [])
+        .filter((p: any) => p.profile_id !== user.id)
+        .map((p: any) => ({
+          ...p,
+          profile: Array.isArray(p.profile) ? p.profile[0] ?? null : p.profile ?? null,
+        })),
     }));
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+    <div className="h-[calc(100dvh-7.5rem)] sm:h-[calc(100vh-8rem)] flex flex-col">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Messages</h1>
         {conversations.length > 0 && (
-          <span className="text-sm text-gray-400">{conversations.length} conversation{conversations.length !== 1 ? 's' : ''}</span>
+          <span className="text-xs sm:text-sm text-gray-400">
+            {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+          </span>
         )}
       </div>
       <ChatSidebar conversations={conversations} currentUserId={user.id} />
