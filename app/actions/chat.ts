@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createClientServer } from '@/lib/supabase-server';
+import { createClientServer, createClientAdmin } from '@/lib/supabase-server';
 
 export async function startConversation({
   targetUserId,
@@ -23,7 +23,7 @@ export async function startConversation({
     redirect('/login');
   }
 
-  // If trying to chat with self, redirect to chat list
+  // If trying to chat with self, do not create conversation — redirect to chat or dashboard
   if (user.id === targetUserId) {
     redirect('/dashboard/chat');
   }
@@ -58,37 +58,50 @@ export async function startConversation({
     }
   }
 
-  // Otherwise, create new conversation
-  const { data: newConv, error: convError } = await supabase
-    .from('conversations')
-    .insert({
-      type,
-      resource_id: resourceId ?? null,
-      need_id: needId ?? null,
-      ride_id: rideId ?? null,
-      skill_id: skillId ?? null,
-      last_message_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single();
+  // Securely provision the conversation channel via admin client
+  let targetConvId: string | null = null;
+  try {
+    const admin = createClientAdmin();
+    const { data: newConv, error: convError } = await admin
+      .from('conversations')
+      .insert({
+        type,
+        resource_id: resourceId ?? null,
+        need_id: needId ?? null,
+        ride_id: rideId ?? null,
+        skill_id: skillId ?? null,
+        last_message_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
 
-  if (convError || !newConv) {
-    console.error('[startConversation] Error creating conversation:', convError);
-    throw new Error('Failed to start conversation');
+    if (convError || !newConv) {
+      console.error('[startConversation] Error creating conversation:', convError);
+      redirect('/dashboard/chat');
+    }
+
+    // Insert both participants
+    const { error: partError } = await admin
+      .from('conversation_participants')
+      .insert([
+        { conversation_id: newConv.id, profile_id: user.id },
+        { conversation_id: newConv.id, profile_id: targetUserId },
+      ]);
+
+    if (partError) {
+      console.error('[startConversation] Error adding participants:', partError);
+      redirect('/dashboard/chat');
+    }
+
+    targetConvId = newConv.id;
+  } catch (err: any) {
+    // If Next.js redirect was thrown, re-throw it so navigation occurs
+    if (err?.message === 'NEXT_REDIRECT') throw err;
+    console.error('[startConversation] Failed to provision conversation:', err);
+    redirect('/dashboard/chat');
   }
 
-  // Insert both participants
-  const { error: partError } = await supabase
-    .from('conversation_participants')
-    .insert([
-      { conversation_id: newConv.id, profile_id: user.id },
-      { conversation_id: newConv.id, profile_id: targetUserId },
-    ]);
-
-  if (partError) {
-    console.error('[startConversation] Error adding participants:', partError);
-    throw new Error('Failed to add participants');
+  if (targetConvId) {
+    redirect(`/dashboard/chat/${targetConvId}`);
   }
-
-  redirect(`/dashboard/chat/${newConv.id}`);
 }
