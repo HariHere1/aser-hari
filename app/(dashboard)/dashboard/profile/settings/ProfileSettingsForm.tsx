@@ -1,0 +1,299 @@
+'use client';
+
+import React, { useActionState, useTransition } from 'react';
+import { updateProfile, updatePassword, UpdateProfileState } from '@/app/actions/profile';
+import { signOut } from '@/app/actions/auth';
+import { User, Lock, LogOut, CheckCircle2, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
+
+const INITIAL: UpdateProfileState = { success: false, error: null };
+
+function FieldInput({
+  label,
+  name,
+  type = 'text',
+  defaultValue,
+  placeholder,
+  required,
+  maxLength,
+  rows,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  defaultValue?: string;
+  placeholder?: string;
+  required?: boolean;
+  maxLength?: number;
+  rows?: number;
+}) {
+  const base =
+    'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white focus:border-transparent transition-all';
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      {rows ? (
+        <textarea
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          maxLength={maxLength}
+          rows={rows}
+          className={`${base} resize-none`}
+        />
+      ) : (
+        <input
+          type={type}
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          required={required}
+          maxLength={maxLength}
+          className={base}
+        />
+      )}
+    </div>
+  );
+}
+
+function StatusBanner({ state }: { state: UpdateProfileState }) {
+  if (!state.success && !state.error) return null;
+  return (
+    <div className={`flex items-start gap-3 px-4 py-3 rounded-xl text-sm border ${
+      state.success
+        ? 'bg-green-50 border-green-200 text-green-700'
+        : 'bg-red-50 border-red-200 text-red-700'
+    }`}>
+      {state.success
+        ? <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        : <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+      <span>{state.success ? 'Changes saved successfully.' : state.error}</span>
+    </div>
+  );
+}
+
+function PasswordField({ label, name, placeholder }: { label: string; name: string; placeholder?: string }) {
+  const [show, setShow] = React.useState(false);
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : 'password'}
+          name={name}
+          placeholder={placeholder ?? '••••••••'}
+          minLength={8}
+          className="w-full px-4 py-3 pr-11 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white focus:border-transparent transition-all"
+        />
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={() => setShow(v => !v)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function ProfileSettingsForm({
+  fullName,
+  email,
+  department,
+  year,
+  studentId,
+  bio,
+  isOAuth,
+}: {
+  fullName: string;
+  email: string;
+  department: string | null;
+  year: string | null;
+  studentId: string | null;
+  bio: string | null;
+  isOAuth: boolean;
+}) {
+  const [profileState, profileAction] = useActionState(updateProfile, INITIAL);
+  const [passwordState, passwordAction] = useActionState(updatePassword, INITIAL);
+  const [isPending, startTransition] = useTransition();
+
+  const YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Postgraduate', 'PhD'];
+  const DEPARTMENTS = [
+    'Computer Science', 'Information Technology', 'Electronics & Communication',
+    'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering',
+    'Chemical Engineering', 'Mathematics', 'Physics', 'Chemistry',
+    'Business Administration', 'Design', 'Arts & Humanities', 'Other',
+  ];
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-5">
+      {/* Back */}
+      <a
+        href="/dashboard/profile"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-black transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Profile
+      </a>
+
+      <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+
+      {/* ── Profile Info ── */}
+      <form action={profileAction} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+            <User className="w-4 h-4 text-gray-500" />
+          </div>
+          <h2 className="font-semibold text-gray-900 text-sm">Profile Information</h2>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <StatusBanner state={profileState} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <FieldInput
+                label="Full Name"
+                name="full_name"
+                defaultValue={fullName}
+                placeholder="Your full name"
+                required
+                maxLength={80}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
+                College Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                disabled
+                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-400 cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-400 mt-1">Email cannot be changed here.</p>
+            </div>
+
+            <FieldInput
+              label="Student ID"
+              name="student_id"
+              defaultValue={studentId ?? ''}
+              placeholder="e.g. CS21001"
+              maxLength={20}
+            />
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Year</label>
+              <select
+                name="year"
+                defaultValue={year ?? ''}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all appearance-none"
+              >
+                <option value="">Select year</option>
+                {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Department</label>
+              <select
+                name="department"
+                defaultValue={department ?? ''}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all appearance-none"
+              >
+                <option value="">Select department</option>
+                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2">
+              <FieldInput
+                label="Bio"
+                name="bio"
+                defaultValue={bio ?? ''}
+                placeholder="Tell your campus mates a bit about yourself…"
+                maxLength={280}
+                rows={3}
+              />
+              <p className="text-xs text-gray-400 mt-1">Max 280 characters.</p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex items-center gap-2 px-6 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {/* ── Change Password ── */}
+      {!isOAuth && (
+        <form action={passwordAction} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Lock className="w-4 h-4 text-gray-500" />
+            </div>
+            <h2 className="font-semibold text-gray-900 text-sm">Change Password</h2>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <StatusBanner state={passwordState} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <PasswordField label="New Password" name="new_password" placeholder="Min 8 characters" />
+              <PasswordField label="Confirm Password" name="confirm_password" />
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex items-center gap-2 px-6 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                Update Password
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* ── Danger Zone ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+          <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+            <LogOut className="w-4 h-4 text-red-500" />
+          </div>
+          <h2 className="font-semibold text-gray-900 text-sm">Account</h2>
+        </div>
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-gray-900">Sign out</p>
+              <p className="text-xs text-gray-400 mt-0.5">You'll need to sign in again to access your account.</p>
+            </div>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors whitespace-nowrap"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
