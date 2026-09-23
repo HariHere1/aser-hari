@@ -27,6 +27,7 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -70,11 +71,11 @@ body {
 @keyframes slideUpOverlay {
   from {
     opacity: 0;
-    transform: translate(-50%, -40%);
+    top: 54%;
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    top: 50%;
   }
 }
 

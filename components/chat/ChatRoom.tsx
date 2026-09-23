@@ -380,7 +380,7 @@ export function ChatRoom({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${otherName}...`}
-            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none min-w-0 leading-relaxed"
+            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus-visible:outline-none min-w-0 leading-relaxed"
           />
           <button
             type="button"

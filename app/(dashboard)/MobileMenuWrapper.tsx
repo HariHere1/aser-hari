@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User, Shield, LogOut } from 'lucide-react';
 import { signOut } from '@/app/actions/auth';
@@ -27,6 +27,18 @@ export function MobileMenuWrapper({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  const close = () => setIsOpen(false);
+
   return (
     <>
       <button
@@ -37,84 +49,91 @@ export function MobileMenuWrapper({
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
+      {/* Backdrop */}
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-xs md:hidden animate-fade-in-overlay"
-            onClick={() => setIsOpen(false)}
-          />
-          {/* Drawer */}
-          <div className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white shadow-2xl md:hidden animate-slide-in-right flex flex-col justify-between">
-            <div>
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
-                <span className="font-bold text-gray-900 text-base">Menu</span>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+        <div
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden animate-fade-in-overlay"
+          onClick={close}
+        />
+      )}
+
+      {/* Drawer — slides in from right */}
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-72 max-w-[80vw] bg-white shadow-2xl md:hidden flex flex-col transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+          <span className="font-bold text-gray-900">Menu</span>
+          <button
+            onClick={close}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* User card */}
+        {userName && (
+          <div className="px-4 pt-4 pb-2 flex-shrink-0">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+              <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                {userInitials || 'S'}
               </div>
-
-              {/* User info snippet if present */}
-              {userName && (
-                <div className="p-4 mx-3 my-2 bg-gray-50 rounded-2xl flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {userInitials || 'S'}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-gray-900 truncate">{userName}</p>
-                    {userEmail && <p className="text-xs text-gray-500 truncate">{userEmail}</p>}
-                  </div>
-                </div>
-              )}
-
-              {/* Nav links */}
-              <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100dvh-15rem)]">
-                {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-700 hover:bg-gray-100 hover:text-black transition-colors font-medium text-sm"
-                  >
-                    <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span>{label}</span>
-                  </Link>
-                ))}
-
-                {isAdmin && (
-                  <div className="pt-2 mt-2 border-t border-gray-100">
-                    <Link
-                      href="/admin/dashboard"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black text-white hover:bg-gray-800 transition-colors font-semibold text-sm"
-                    >
-                      <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Admin Portal</span>
-                    </Link>
-                  </div>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="text-sm font-bold text-gray-900 truncate leading-tight">{userName}</p>
+                {userEmail && (
+                  <p className="text-xs text-gray-500 truncate leading-tight mt-0.5">{userEmail}</p>
                 )}
-              </nav>
-            </div>
-
-            {/* Bottom Sign-out button */}
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              </form>
+              </div>
             </div>
           </div>
-        </>
-      )}
+        )}
+
+        {/* Nav links — scrollable */}
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
+          <div className="space-y-0.5">
+            {NAV_LINKS.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={close}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-700 hover:bg-gray-100 hover:text-black transition-colors font-medium text-sm"
+              >
+                <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="truncate">{label}</span>
+              </Link>
+            ))}
+
+            {isAdmin && (
+              <div className="pt-2 mt-2 border-t border-gray-100">
+                <Link
+                  href="/admin/dashboard"
+                  onClick={close}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black text-white hover:bg-gray-800 transition-colors font-semibold text-sm"
+                >
+                  <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Admin Portal</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        </nav>
+
+        {/* Sign out — pinned to bottom */}
+        <div className="px-4 py-4 border-t border-gray-100 flex-shrink-0">
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 active:scale-95 transition-all"
+            >
+              <LogOut className="w-4 h-4 flex-shrink-0" />
+              <span>Sign Out</span>
+            </button>
+          </form>
+        </div>
+      </div>
     </>
   );
 }

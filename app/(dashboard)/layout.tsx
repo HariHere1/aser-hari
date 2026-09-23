@@ -30,12 +30,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link href="/dashboard" className="flex items-center gap-2 flex-shrink-0">
               <Network className="w-4 h-4 text-black flex-shrink-0" />
               <span className="text-base font-bold tracking-tight">CampusNet</span>
             </Link>

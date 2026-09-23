@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { X, Megaphone } from 'lucide-react';
+import { createClient } from '@/lib/supabase';
 
 export type Announcement = {
   id: string;
@@ -13,22 +14,68 @@ export type Announcement = {
   emoji: string | null;
 };
 
-export function AnnouncementBanner({ announcement }: { announcement: Announcement | null }) {
+// Check sessionStorage dismissal for a given announcement id
+function isDismissed(id: string) {
+  try {
+    return !!sessionStorage.getItem(`announcement_dismissed_${id}`);
+  } catch {
+    return false;
+  }
+}
+
+function setDismissed(id: string) {
+  try {
+    sessionStorage.setItem(`announcement_dismissed_${id}`, '1');
+  } catch { /* ignore */ }
+}
+
+export function AnnouncementBanner({ announcement: initialAnnouncement }: { announcement: Announcement | null }) {
+  const [announcement, setAnnouncement] = useState<Announcement | null>(initialAnnouncement);
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    if (!announcement) return;
-    const key = `announcement_dismissed_${announcement.id}`;
-    if (typeof window !== 'undefined' && !sessionStorage.getItem(key)) {
+  // Show the popup if not already dismissed in this session
+  const tryShow = (ann: Announcement | null) => {
+    if (!ann) return;
+    if (!isDismissed(ann.id)) {
+      setAnnouncement(ann);
       setVisible(true);
     }
-  }, [announcement]);
+  };
+
+  // On mount: show SSR-provided announcement if not dismissed
+  useEffect(() => {
+    tryShow(initialAnnouncement);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Realtime: listen for new active announcements pushed by admin
+  // This fires for ALL currently-open sessions the moment admin clicks Send
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel('announcements-live')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'announcements',
+          filter: 'is_active=eq.true',
+        },
+        (payload) => {
+          const newAnn = payload.new as Announcement;
+          tryShow(newAnn);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!announcement || !visible) return null;
 
   const dismiss = () => {
-    const key = `announcement_dismissed_${announcement.id}`;
-    sessionStorage.setItem(key, '1');
+    setDismissed(announcement.id);
     setVisible(false);
   };
 
@@ -40,10 +87,15 @@ export function AnnouncementBanner({ announcement }: { announcement: Announcemen
         onClick={dismiss}
       />
 
-      {/* Modal Card */}
+      {/* Modal Card — always truly centered via inline style so no Tailwind/keyframe conflict */}
       <div
-        className="fixed z-[1000] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-slide-up-overlay"
-        style={{ width: 'min(92vw, 440px)' }}
+        className="fixed z-[1000] animate-slide-up-overlay"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'min(92vw, 440px)',
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="announcement-title"
@@ -52,18 +104,18 @@ export function AnnouncementBanner({ announcement }: { announcement: Announcemen
           {/* Top accent strip */}
           <div className="h-1 w-full bg-gradient-to-r from-black via-gray-700 to-gray-400" />
 
-          <div className="p-7 sm:p-8">
+          <div className="p-6 sm:p-8">
             {/* Header row */}
-            <div className="flex items-start justify-between gap-4 mb-5">
-              <div className="flex items-center gap-3">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-2xl bg-black flex items-center justify-center flex-shrink-0">
                   {announcement.emoji ? (
                     <span className="text-lg leading-none">{announcement.emoji}</span>
                   ) : (
-                    <Megaphone className="w-4.5 h-4.5 text-white" />
+                    <Megaphone className="w-4 h-4 text-white" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                     From CampusNet Admin
                   </span>
