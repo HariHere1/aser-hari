@@ -67,12 +67,16 @@ export const FeaturesSection = () => {
               style={{ opacity: 0, animationDelay: f.delay }}
               className="animate-fade-in-up"
             >
-              <Card className="p-8 h-full hover:border-gray-300 transition-all group">
-                <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors">
-                  {f.icon}
+              <Card className="group relative h-full overflow-hidden p-8 transition-all duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-xl">
+                <div className="pointer-events-none absolute inset-3 rounded-2xl border border-white/80 bg-gray-50/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative z-10">
+                  <span className="status-dot absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 transition-colors group-hover:bg-black group-hover:text-white">
+                    {f.icon}
+                  </div>
+                  <h3 className="mb-3 text-xl font-semibold">{f.title.split(' ').map((word, index) => <React.Fragment key={`${word}-${index}`}>{index > 0 ? ' ' : ''}<span className={['Verified', 'Match', 'Reputation', 'Search', 'Ride', 'Skill'].includes(word) ? 'rounded bg-yellow-200 px-1' : ''}>{word}</span></React.Fragment>)}</h3>
+                  <p className="leading-relaxed text-gray-600">{f.desc}</p>
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{f.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{f.desc}</p>
               </Card>
             </div>
           ))}

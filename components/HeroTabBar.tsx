@@ -21,48 +21,39 @@ interface HeroTabBarProps {
 }
 
 export const HeroTabBar = ({ activeTab, setActiveTab }: HeroTabBarProps) => {
-  return (
-    <div className="flex justify-center mb-12 px-6">
-      <div className="bg-gray-100 rounded-lg p-1 flex items-center">
-        {/* Mobile: 2x2 Grid */}
-        <div className="grid grid-cols-2 gap-1 md:hidden">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === tab.id
-                ? 'bg-white text-black shadow-sm'
-                : 'text-gray-600 hover:text-black'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
+  const moveTab = (id: string, direction: number) => {
+    const currentIndex = TABS.findIndex((tab) => tab.id === id);
+    const nextIndex = (currentIndex + direction + TABS.length) % TABS.length;
+    setActiveTab(TABS[nextIndex].id);
+  };
 
-        {/* Desktop: Row with Dividers */}
-        <div className="hidden md:flex items-center">
-          {TABS.map((tab, index) => (
-            <React.Fragment key={tab.id}>
-              <button
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                  activeTab === tab.id
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-              {index < TABS.length - 1 && (
-                <div className="w-px h-5 bg-gray-300" />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+  return (
+    <div className="mb-12 min-w-0 overflow-x-auto px-6 pb-1">
+      <div role="tablist" aria-label="CampusNet categories" className="mx-auto flex w-max min-w-full justify-center rounded-2xl border border-gray-200 bg-gray-100 p-1 md:min-w-0">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            id={`tab-${tab.id}`}
+            role="tab"
+            type="button"
+            aria-selected={activeTab === tab.id}
+            aria-controls="showcase-panel"
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            onClick={() => setActiveTab(tab.id)}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowRight') { event.preventDefault(); moveTab(tab.id, 1); }
+              if (event.key === 'ArrowLeft') { event.preventDefault(); moveTab(tab.id, -1); }
+              if (event.key === 'Home') { event.preventDefault(); setActiveTab(TABS[0].id); }
+              if (event.key === 'End') { event.preventDefault(); setActiveTab(TABS[TABS.length - 1].id); }
+            }}
+            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition-all md:px-7 ${
+              activeTab === tab.id ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:bg-white/70 hover:text-black'
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
       </div>
     </div>
   );
