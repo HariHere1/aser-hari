@@ -1,4 +1,6 @@
 # CampusNet 🎓
+<img width="691" height="522" alt="image" src="https://github.com/user-attachments/assets/59a283dc-0e16-4444-ab6e-3a23cfa075d6" />
+
 
 > A verified campus resource network connecting students with **resources, skills, needs, and rides**.
 
