@@ -121,7 +121,6 @@ export function ChatRoom({
         },
         async (payload) => {
           const newMsg = payload.new as Message;
-          if (messages.some(m => m.id === newMsg.id)) return;
 
           const { data: sender } = await supabase
             .from('profiles')
@@ -129,7 +128,11 @@ export function ChatRoom({
             .eq('id', newMsg.sender_id)
             .single();
 
-          setMessages((prev) => [...prev, { ...newMsg, sender: sender ?? null }]);
+          // Use functional update so we always check the latest state, not a stale closure
+          setMessages((prev) => {
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+            return [...prev, { ...newMsg, sender: sender ?? null }];
+          });
         }
       )
       .subscribe();
@@ -368,8 +371,8 @@ export function ChatRoom({
       )}
 
       {/* Input */}
-      <div className="pt-2 sm:pt-3 border-t border-gray-100 flex-shrink-0">
-        <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-2xl px-3 py-1.5 sm:px-4 sm:py-2 focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition-all">
+      <div className="pt-3 border-t border-gray-100 flex-shrink-0">
+        <div className="flex items-center gap-3 bg-white border-2 border-gray-200 rounded-2xl px-4 py-3 focus-within:border-gray-900 focus-within:shadow-sm transition-all duration-200 shadow-sm">
           <input
             ref={inputRef}
             type="text"
@@ -377,17 +380,18 @@ export function ChatRoom({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${otherName}...`}
-            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none min-w-0"
+            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none min-w-0 leading-relaxed"
           />
           <button
+            type="button"
             onClick={sendMessage}
             disabled={!input.trim() || sending}
-            className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+            className="w-9 h-9 flex items-center justify-center bg-gray-900 text-white rounded-xl hover:bg-black active:scale-95 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
           >
-            {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
         </div>
-        <p className="text-[11px] text-gray-400 mt-1 text-center hidden sm:block">Press Enter to send</p>
+        <p className="text-[11px] text-gray-400 mt-1.5 text-center hidden sm:block">Press Enter to send</p>
       </div>
     </div>
   );

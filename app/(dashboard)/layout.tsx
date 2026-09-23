@@ -5,12 +5,22 @@ import { createClientServer } from '@/lib/supabase-server';
 import { signOut } from '@/app/actions/auth';
 import { MobileMenuWrapper } from '@/app/(dashboard)/MobileMenuWrapper';
 import { isAdmin } from '@/lib/admin';
+import { AnnouncementBanner } from '@/components/AnnouncementBanner';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClientServer();
   const { data: { user } } = await supabase.auth.getUser();
 
   const userIsAdmin = isAdmin(user);
+
+  // Fetch active announcement for popup (null if none)
+  const { data: announcement } = await supabase
+    .from('announcements')
+    .select('id, title, body, cta_label, cta_url, emoji')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
   const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Student';
   const initials = displayName
     .split(' ')
@@ -101,6 +111,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {children}
       </main>
+
+      {/* Admin broadcast popup */}
+      <AnnouncementBanner announcement={announcement ?? null} />
     </div>
   );
 }

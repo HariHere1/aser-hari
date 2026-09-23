@@ -15,9 +15,12 @@ import {
   Trash2, 
   ExternalLink,
   Loader2,
-  Phone
+  Phone,
+  Megaphone,
+  BellOff,
+  Send,
 } from 'lucide-react';
-import { toggleVerifyStudent, deleteListingAdmin } from '@/app/actions/admin';
+import { toggleVerifyStudent, deleteListingAdmin, sendAnnouncement, deactivateAnnouncement } from '@/app/actions/admin';
 
 interface AdminDashboardClientProps {
   initialStudents: any[];
@@ -40,6 +43,15 @@ export function AdminDashboardClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [isPending, startTransition] = useTransition();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  // Broadcast state
+  const [broadcastTitle, setBroadcastTitle] = useState('');
+  const [broadcastBody, setBroadcastBody] = useState('');
+  const [broadcastEmoji, setBroadcastEmoji] = useState('📢');
+  const [broadcastCtaLabel, setBroadcastCtaLabel] = useState('');
+  const [broadcastCtaUrl, setBroadcastCtaUrl] = useState('');
+  const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [broadcastError, setBroadcastError] = useState<string | null>(null);
 
   // Filter lists based on search
   const q = searchQuery.toLowerCase().trim();
@@ -97,6 +109,36 @@ export function AdminDashboardClient({
     });
   };
 
+  const handleSendAnnouncement = async () => {
+    if (!broadcastTitle.trim() || !broadcastBody.trim()) return;
+    setBroadcastStatus('sending');
+    setBroadcastError(null);
+    const res = await sendAnnouncement({
+      title: broadcastTitle,
+      body: broadcastBody,
+      emoji: broadcastEmoji,
+      cta_label: broadcastCtaLabel,
+      cta_url: broadcastCtaUrl,
+    });
+    if (res.success) {
+      setBroadcastStatus('success');
+      setTimeout(() => setBroadcastStatus('idle'), 4000);
+    } else {
+      setBroadcastStatus('error');
+      setBroadcastError(res.error ?? 'Something went wrong.');
+    }
+  };
+
+  const handleDeactivate = async () => {
+    setBroadcastStatus('sending');
+    const res = await deactivateAnnouncement();
+    if (res.success) {
+      setBroadcastStatus('idle');
+      setActionMessage('Announcement deactivated — popup removed for all users.');
+      setTimeout(() => setActionMessage(null), 4000);
+    }
+  };
+
   const verifiedCount = initialStudents.filter(s => s.is_verified).length;
   const totalListings = initialResources.length + initialRides.length + initialNeeds.length + initialSkills.length;
 
@@ -124,6 +166,159 @@ export function AdminDashboardClient({
             {actionMessage}
           </div>
         )}
+      </div>
+
+      {/* Broadcast Notification Panel */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center flex-shrink-0">
+            <Megaphone className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-gray-900">Broadcast Notification</h2>
+            <p className="text-xs text-gray-500">Send a popup announcement to all logged-in users</p>
+          </div>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Form */}
+          <div className="space-y-4">
+            {/* Emoji + Title */}
+            <div className="flex gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Icon</label>
+                <input
+                  type="text"
+                  value={broadcastEmoji}
+                  onChange={(e) => setBroadcastEmoji(e.target.value)}
+                  maxLength={2}
+                  className="w-14 h-10 text-center text-xl border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 transition-colors bg-gray-50"
+                  placeholder="📢"
+                />
+              </div>
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Title <span className="text-red-400">*</span></label>
+                <input
+                  type="text"
+                  value={broadcastTitle}
+                  onChange={(e) => setBroadcastTitle(e.target.value)}
+                  placeholder="e.g. Add your WhatsApp number!"
+                  className="h-10 px-3.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Message <span className="text-red-400">*</span></label>
+              <textarea
+                value={broadcastBody}
+                onChange={(e) => setBroadcastBody(e.target.value)}
+                placeholder="e.g. Add your phone number to your profile to receive direct WhatsApp messages from other students about your listings."
+                rows={3}
+                className="px-3.5 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-colors resize-none leading-relaxed"
+              />
+            </div>
+
+            {/* Optional CTA */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Button Label <span className="text-gray-400">(optional)</span></label>
+                <input
+                  type="text"
+                  value={broadcastCtaLabel}
+                  onChange={(e) => setBroadcastCtaLabel(e.target.value)}
+                  placeholder="e.g. Add Phone Number"
+                  className="h-10 px-3.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-colors"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Button URL <span className="text-gray-400">(optional)</span></label>
+                <input
+                  type="text"
+                  value={broadcastCtaUrl}
+                  onChange={(e) => setBroadcastCtaUrl(e.target.value)}
+                  placeholder="/dashboard/profile"
+                  className="h-10 px-3.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={handleSendAnnouncement}
+                disabled={!broadcastTitle.trim() || !broadcastBody.trim() || broadcastStatus === 'sending'}
+                className="flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              >
+                {broadcastStatus === 'sending' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+                {broadcastStatus === 'sending' ? 'Sending...' : 'Send to All Users'}
+              </button>
+              <button
+                onClick={handleDeactivate}
+                disabled={broadcastStatus === 'sending'}
+                className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 active:scale-95 transition-all"
+              >
+                <BellOff className="w-3.5 h-3.5" />
+                Deactivate
+              </button>
+            </div>
+
+            {/* Status feedback */}
+            {broadcastStatus === 'success' && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-xl">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Announcement sent! All users will see the popup on their next page load.
+              </div>
+            )}
+            {broadcastStatus === 'error' && broadcastError && (
+              <div className="px-4 py-2.5 bg-red-50 border border-red-200 text-red-700 text-xs font-medium rounded-xl">
+                {broadcastError}
+              </div>
+            )}
+          </div>
+
+          {/* Live Preview */}
+          <div className="flex flex-col gap-2">
+            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Live Preview</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-center min-h-[220px]">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden w-full max-w-xs">
+                <div className="h-0.5 w-full bg-gradient-to-r from-black via-gray-700 to-gray-400" />
+                <div className="p-5">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center flex-shrink-0">
+                      <span className="text-base leading-none">{broadcastEmoji || '📢'}</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">From CampusNet Admin</p>
+                      <p className="text-sm font-bold text-gray-900 leading-snug">
+                        {broadcastTitle || <span className="text-gray-300 font-normal italic">Your title here</span>}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                    {broadcastBody || <span className="italic text-gray-300">Your message will appear here...</span>}
+                  </p>
+                  <div className="flex gap-2">
+                    {broadcastCtaLabel && (
+                      <div className="flex-1 text-center px-3 py-2 bg-black text-white text-xs font-semibold rounded-lg">
+                        {broadcastCtaLabel}
+                      </div>
+                    )}
+                    <div className={`${broadcastCtaLabel ? '' : 'flex-1'} text-center px-3 py-2 ${broadcastCtaLabel ? 'border border-gray-200 text-gray-600' : 'bg-black text-white'} text-xs font-semibold rounded-lg`}>
+                      {broadcastCtaLabel ? 'Dismiss' : 'Got it'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-400 text-center">This is how users will see the popup</p>
+          </div>
+        </div>
       </div>
 
       {/* Hero Metric Cards */}
