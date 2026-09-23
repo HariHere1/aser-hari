@@ -31,10 +31,13 @@ export async function updateProfile(
   }
 
   const rawPhone = (formData.get('phone_number') as string)?.trim();
+  // Checkbox: 'on' = checked/enabled; absence means unchecked
   const whatsappCheckbox = formData.get('whatsapp_enabled');
+  // When a phone exists and checkbox is absent (unchecked), treat as OFF — user explicitly disabled
   const wantsWhatsapp = whatsappCheckbox === 'on' || whatsappCheckbox === 'true' || whatsappCheckbox === '1';
 
   let finalPhoneNumber: string | null = null;
+  // Default: ON if phone is present (opt-out model)
   let finalWhatsappEnabled = false;
 
   if (rawPhone) {
@@ -44,12 +47,10 @@ export async function updateProfile(
       return { success: false, error: phoneValidation.error || 'Please enter a valid Indian phone number.' };
     }
     finalPhoneNumber = phoneValidation.normalized ?? null;
+    // ON by default; only OFF if user explicitly unchecked
     finalWhatsappEnabled = wantsWhatsapp;
   } else {
-    // If no phone number is provided but WhatsApp is toggled on, reject
-    if (wantsWhatsapp) {
-      return { success: false, error: 'A valid phone number is required to enable WhatsApp contact.' };
-    }
+    // No phone number — WhatsApp cannot be enabled
     finalPhoneNumber = null;
     finalWhatsappEnabled = false;
   }

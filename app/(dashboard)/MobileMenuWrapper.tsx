@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Menu, X, BookOpen, Car, Users, HelpCircle, MessageSquare, User, Shield, LogOut } from 'lucide-react';
 import { signOut } from '@/app/actions/auth';
@@ -26,6 +27,12 @@ export function MobileMenuWrapper({
   userInitials?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Only render portal after mount (SSR safety)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -39,29 +46,23 @@ export function MobileMenuWrapper({
 
   const close = () => setIsOpen(false);
 
-  return (
+  const drawer = (
     <>
-      <button
-        className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
-
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden animate-fade-in-overlay"
-          onClick={close}
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm md:hidden transition-opacity duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ zIndex: 9998 }}
+        onClick={close}
+      />
 
       {/* Drawer — slides in from right */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-72 max-w-[80vw] bg-white shadow-2xl md:hidden flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-72 max-w-[80vw] bg-white shadow-2xl md:hidden flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{ zIndex: 9999 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
@@ -134,6 +135,22 @@ export function MobileMenuWrapper({
           </form>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Hamburger button — stays inside nav */}
+      <button
+        className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle menu"
+      >
+        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+
+      {/* Drawer rendered via portal directly on body — escapes nav stacking context */}
+      {mounted && createPortal(drawer, document.body)}
     </>
   );
 }

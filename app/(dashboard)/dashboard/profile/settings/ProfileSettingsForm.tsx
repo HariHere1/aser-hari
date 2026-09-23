@@ -130,17 +130,22 @@ export function ProfileSettingsForm({
   const [avatar, setAvatar] = React.useState<string | null>(avatarUrl ?? null);
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
   const [phoneVal, setPhoneVal] = React.useState<string>(formatPhoneDisplay(phoneNumber));
-  const [isWhatsAppOn, setIsWhatsAppOn] = React.useState(Boolean(whatsappEnabled));
+  // ON by default if there's a phone number — user can turn it off explicitly
+  const [isWhatsAppOn, setIsWhatsAppOn] = React.useState(
+    phoneNumber ? (whatsappEnabled !== false) : Boolean(whatsappEnabled)
+  );
   const [hasManuallyToggled, setHasManuallyToggled] = React.useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setPhoneVal(val);
     const digits = val.replace(/\D/g, '');
+    // Auto-enable when a valid number is entered, unless user deliberately turned it off
     if (digits.length >= 10 && !hasManuallyToggled) {
       setIsWhatsAppOn(true);
     } else if (digits.length === 0) {
       setIsWhatsAppOn(false);
+      setHasManuallyToggled(false); // reset so next number entry auto-enables again
     }
   };
 

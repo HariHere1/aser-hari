@@ -27,7 +27,10 @@ export default async function ProfileSettingsPage() {
   const avatarUrl = profile?.avatar_url ?? user.user_metadata?.avatar_url ?? null;
 
   const phoneNumber = profile?.phone_number ?? user.user_metadata?.phone_number ?? null;
-  const whatsappEnabled = profile?.whatsapp_enabled ?? user.user_metadata?.whatsapp_enabled ?? false;
+  // Opt-out model: default ON when a phone number exists, unless user explicitly disabled it
+  const whatsappEnabled = phoneNumber
+    ? (profile?.whatsapp_enabled ?? user.user_metadata?.whatsapp_enabled ?? true)
+    : false;
 
   // Detect OAuth users (Google etc.) — they can't change password
   const identities = user.identities ?? [];
